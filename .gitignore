@@ -1,0 +1,35 @@
+# Dependencies
+venv/
+backend/venv/
+node_modules/
+*.log
+
+# Backend
+backend/instance/
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDEs
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Builds
+dist/
+build/
+
+# Env
+.env
+*.env
+
+# DB
+*.db
+backend/instance/*.db
