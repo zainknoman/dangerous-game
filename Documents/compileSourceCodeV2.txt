@@ -1,0 +1,3058 @@
+-- level.js --start
+// levels.js — Dangerous Game tile maps
+// Tile IDs:
+//  0 = empty
+//  1 = solid ground
+//  2 = brick wall
+//  3 = spike (kill)
+//  4 = trophy (collect +500)
+//  5 = key
+//  6 = door (needs key)
+//  7 = gun pickup
+//  8 = water/lava (kill)
+//  9 = ladder
+// 10 = platform (thin, stand on top)
+// 11 = enemy spawn
+// 12 = player spawn
+// 13 = level end warp tile (activated after door collected)
+// 14 = jetpack pickup
+// 15 = extra life
+
+const TILE = {
+  EMPTY:    0,
+  SOLID:    1,
+  BRICK:    2,
+  SPIKE:    3,
+  TROPHY:   4,
+  KEY:      5,
+  DOOR:     6,
+  GUN:      7,
+  HAZARD:   8,
+  LADDER:   9,
+  PLATFORM: 10,
+  ENEMY:    11,
+  SPAWN:    12,
+  WARP:     13,
+  JETPACK:  14,
+  LIFE:     15,
+};
+
+// Level dimensions: each level is rows of tile IDs
+// Each level should be ~80 tiles wide × 10 tiles tall = scrolling world
+// Player spawn marked with tile 12 (replaced with empty at load)
+
+const LEVELS = [
+  // ── Level 1 ─────────────────────────────────────────────────────
+  {
+    name: "LEVEL 1",
+    width: 50,
+    height: 10,
+    bgColor: "#1a0a2e",
+    tiles: [
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,0,0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,6,0,0,0,0,1],
+      [1,0,0,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ]
+  },
+  // ── Level 2 ─────────────────────────────────────────────────────
+  {
+    name: "LEVEL 2",
+    width: 55,
+    height: 10,
+    bgColor: "#0a1a0a",
+    tiles: [
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,0,4,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,1],
+      [1,0,0,0,0,0,0,0,11,0,0,0,0,0,0,0,0,11,0,0,0,0,0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,6,0,1],
+      [1,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ]
+  },
+  // ── Level 3 ─────────────────────────────────────────────────────
+  {
+    name: "LEVEL 3",
+    width: 60,
+    height: 10,
+    bgColor: "#1a0a0a",
+    tiles: [
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,1],
+      [1,0,0,0,0,0,0,0,11,0,0,0,0,0,0,0,0,0,0,0,11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,5,0,0,6,0,0,1],
+      [1,1,1,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,1,1,0,0,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ]
+  },
+  // ── Level 4 ─────────────────────────────────────────────────────
+  {
+    name: "LEVEL 4",
+    width: 65,
+    height: 10,
+    bgColor: "#0a0a1a",
+    tiles: [
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,0,4,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,0,0,0,11,0,0,0,0,0,0,0,11,0,0,0,0,0,0,0,0,0,11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,14,0,0,5,0,6,0,0,1],
+      [1,0,0,1,1,1,0,0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ]
+  },
+  // ── Level 5 ─────────────────────────────────────────────────────
+  {
+    name: "LEVEL 5",
+    width: 70,
+    height: 10,
+    bgColor: "#1a1a00",
+    tiles: [
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,0,4,0,0,4,0,0,4,0,0,0,0,0,0,0,4,0,0,0,0,4,0,0,0,0,0,0,4,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,1,1,0,1,1,0,1,1,0,0,0,0,1,1,1,1,0,0,0,1,1,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,0,0,0,0,0,0,0,0,0,11,0,0,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,6,0,0,14,0,0,7,1],
+      [1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,1,1,0,0,0,0,1,1,0,0,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ]
+  },
+  // ── Level 6 ─────────────────────────────────────────────────────
+  {
+    name: "LEVEL 6",
+    width: 70,
+    height: 10,
+    bgColor: "#0a1a1a",
+    tiles: [
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,0,4,0,4,0,0,0,4,0,0,4,0,0,0,4,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,1,1,1,1,0,0,1,1,1,1,1,0,0,1,1,1,1,1,0,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0,1,1,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,0,0,0,0,11,0,0,0,0,0,0,11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,0,0,0,0,0,0,5,0,0,0,15,0,6,0,0,0,0,0,0,0,1],
+      [1,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ]
+  },
+  // ── Level 7 ─────────────────────────────────────────────────────
+  {
+    name: "LEVEL 7",
+    width: 75,
+    height: 10,
+    bgColor: "#1a0a1a",
+    tiles: [
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,0,4,4,0,0,4,0,0,0,4,4,0,0,0,4,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,1,1,1,0,1,1,0,0,1,1,1,0,0,1,1,1,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,0,0,11,0,0,0,0,11,0,0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,0,0,0,7,0,5,0,0,6,0,14,0,0,0,0,0,0,1],
+      [1,0,1,1,1,0,1,1,1,0,0,0,1,1,1,0,0,1,1,1,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ]
+  },
+  // ── Level 8 ─────────────────────────────────────────────────────
+  {
+    name: "LEVEL 8",
+    width: 80,
+    height: 10,
+    bgColor: "#001010",
+    tiles: [
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,0,4,0,0,0,4,0,0,4,0,0,4,0,0,0,4,0,0,4,0,0,0,0,0,4,0,0,0,0,4,0,0,0,0,0,0,4,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,1,1,0,1,1,1,0,1,1,1,0,1,1,0,0,1,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,0,0,11,0,0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,0,0,0,0,0,0,7,0,14,0,5,0,6,0,0,0,0,0,0,0,0,1],
+      [1,0,1,1,1,0,1,1,1,0,0,0,1,1,1,1,0,0,1,1,1,1,0,0,1,1,1,0,0,1,1,1,0,1,1,0,0,1,1,0,0,1,1,0,0,0,1,1,1,0,0,0,0,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ]
+  },
+  // ── Level 9 ─────────────────────────────────────────────────────
+  {
+    name: "LEVEL 9",
+    width: 80,
+    height: 10,
+    bgColor: "#100010",
+    tiles: [
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,0,4,4,4,0,0,4,4,0,0,4,4,0,4,4,0,0,0,4,0,0,0,4,4,0,0,0,0,0,4,0,0,0,0,4,0,0,0,0,0,4,0,0,0,0,0,0,4,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,1,1,1,1,0,1,1,1,0,1,1,1,0,1,1,0,0,1,1,1,0,0,1,1,1,0,0,0,1,1,1,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,0,11,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,0,11,0,0,0,0,0,0,0,0,0,0,11,0,0,0,0,0,0,0,0,0,7,14,0,0,5,0,6,0,0,15,0,0,0,0,0,0,0,0,1],
+      [1,0,0,0,1,1,1,0,0,1,1,1,0,1,1,1,1,1,1,0,0,1,1,1,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ]
+  },
+  // ── Level 10 ────────────────────────────────────────────────────
+  {
+    name: "LEVEL 10",
+    width: 90,
+    height: 10,
+    bgColor: "#0f0007",
+    tiles: [
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,0,4,4,0,4,4,0,4,4,0,4,4,0,0,4,4,0,0,4,0,0,4,0,0,0,4,0,0,0,4,4,0,0,0,4,0,0,0,0,4,4,0,0,0,4,0,0,0,0,4,0,0,0,0,0,4,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,1,1,1,1,1,1,0,1,1,1,1,1,0,0,1,1,1,0,1,1,0,1,1,0,1,1,1,0,0,1,1,1,0,1,1,1,0,0,1,1,1,0,0,1,1,1,0,0,0,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,0,11,0,0,11,0,0,0,11,0,0,0,11,0,0,0,0,11,0,0,0,0,11,0,0,0,11,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,11,0,0,0,0,0,0,0,7,14,0,0,5,0,0,6,0,0,0,0,0,0,15,0,0,0,0,0,0,0,0,1],
+      [1,0,1,1,1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,0,1,1,1,0,1,1,1,0,0,1,1,1,0,0,1,1,1,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    ]
+  },
+];
+
+
+-- level.js --end
+
+-- game.js --start
+// ═══════════════════════════════════════════════════════════════════
+//  DANGEROUS GAME — Browser Clone
+//  game.js — Main engine
+// ═══════════════════════════════════════════════════════════════════
+
+const TILE_SIZE = 32;   // rendered tile size (scaled from 16px original)
+const CANVAS_W  = 760;
+const CANVAS_H  = 320;
+const COLS_VIS  = Math.ceil(CANVAS_W / TILE_SIZE); // visible tile columns
+const ROWS_VIS  = Math.ceil(CANVAS_H / TILE_SIZE);
+
+// ── Tile flag helpers ─────────────────────────────────────────────
+const TF = {
+  isSolid:   t => t === 1 || t === 2,
+  isKill:    t => t === 3 || t === 8,
+  isTrophy:  t => t === 4,
+  isKey:     t => t === 5,
+  isDoor:    t => t === 6,
+  isGun:     t => t === 7,
+  isJetpack: t => t === 14,
+  isLife:    t => t === 15,
+};
+
+// ── Audio (Web Audio API) ─────────────────────────────────────────
+let audioCtx = null;
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+function playTone(freq, duration, type = 'square', vol = 0.15) {
+  try {
+    const ctx = getAudio();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration);
+  } catch(e) {}
+}
+function sfxJump()    { playTone(300, 0.12, 'square', 0.1); setTimeout(()=>playTone(500, 0.08,'square',0.08),60); }
+function sfxShoot()   { playTone(800, 0.05, 'sawtooth', 0.08); }
+function sfxHit()     { playTone(150, 0.25, 'sawtooth', 0.18); }
+function sfxCollect() { playTone(600, 0.06); setTimeout(()=>playTone(900,0.06),60); setTimeout(()=>playTone(1200,0.1),120); }
+function sfxDoor()    { [400,500,600,800].forEach((f,i)=>setTimeout(()=>playTone(f,0.15),i*80)); }
+function sfxDie()     { [300,250,200,150,100].forEach((f,i)=>setTimeout(()=>playTone(f,0.12,'sawtooth',0.15),i*60)); }
+function sfxLevelUp() { [400,500,600,700,900,1100].forEach((f,i)=>setTimeout(()=>playTone(f,0.18),i*70)); }
+
+// ── Sprite drawing (pixel art, no external image) ─────────────────
+const SPRITES = {};
+(function buildSprites() {
+  function makeCanvas(w, h) {
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h; return c;
+  }
+  function px(ctx, x, y, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, 1, 1);
+  }
+
+  // Janzi — 12×16 px
+  function drawJanzi(ctx, frame, dir) {
+    ctx.clearRect(0,0,12,16);
+    if (dir === -1) { ctx.save(); ctx.scale(-1,1); ctx.translate(-12,0); }
+
+    const b = '#4488ff', s = '#ffcc44', k = '#222', fl = '#ff6644';
+    // Head
+    [[3,0],[4,0],[5,0],[6,0],[7,0],[8,0],
+     [2,1],[3,1],[4,1],[5,1],[6,1],[7,1],[8,1],[9,1],
+     [2,2],[3,2],[4,2],[5,2],[6,2],[7,2],[8,2],[9,2],
+     [2,3],[3,3],[4,3],[5,3],[6,3],[7,3],[8,3],[9,3]].forEach(([x,y])=>px(ctx,x,y,s));
+    // Eyes
+    px(ctx,4,2,k); px(ctx,7,2,k);
+    // Body
+    for(let y=4;y<10;y++) for(let x=2;x<10;x++) px(ctx,x,y,b);
+    // Gun arm
+    const ga = frame%2===0?[10,6,11,6,11,7]:[10,7,11,7,11,8];
+    for(let i=0;i<ga.length;i+=2) px(ctx,ga[i],ga[i+1],'#888');
+    // Legs
+    if (frame===0) {
+      for(let y=10;y<16;y++) { px(ctx,2,y,b); px(ctx,3,y,b); px(ctx,8,y,b); px(ctx,9,y,b); }
+    } else {
+      px(ctx,2,10,b);px(ctx,3,10,b);px(ctx,8,10,b);px(ctx,9,10,b);
+      px(ctx,1,11,b);px(ctx,2,11,b);px(ctx,9,11,b);px(ctx,10,11,b);
+      px(ctx,1,12,fl);px(ctx,2,12,fl);px(ctx,9,12,fl);px(ctx,10,12,fl);
+    }
+    if (dir===-1) ctx.restore();
+  }
+
+  const Janzi_FRAMES = 4;
+  for (let f=0; f<Janzi_FRAMES; f++) {
+    for (const d of [1,-1]) {
+      const c = makeCanvas(12,16);
+      drawJanzi(c.getContext('2d'), f, d);
+      SPRITES[`Janzi_${f}_${d}`] = c;
+    }
+  }
+
+  // Janzi dead (X eyes)
+  const deadC = makeCanvas(12,16);
+  const dctx = deadC.getContext('2d');
+  drawJanzi(dctx, 0, 1);
+  dctx.fillStyle = '#ff0000';
+  dctx.fillRect(3,2,3,1); dctx.fillRect(4,1,1,3); // X left eye
+  dctx.fillRect(6,2,3,1); dctx.fillRect(7,1,1,3); // X right eye
+  SPRITES['Janzi_dead'] = deadC;
+
+  // Enemy — 12×14 px green monster
+  function makeEnemy(frame) {
+    const c = makeCanvas(12,14);
+    const ctx = c.getContext('2d');
+    const g='#44cc44', dg='#228822', e='#ff0000', k='#000';
+    // body
+    for(let y=2;y<12;y++) for(let x=1;x<11;x++) px(ctx,x,y,g);
+    // head bumps
+    px(ctx,2,1,g);px(ctx,3,1,g);px(ctx,5,0,g);px(ctx,6,0,g);px(ctx,8,1,g);px(ctx,9,1,g);
+    // eyes
+    px(ctx,2,4,e);px(ctx,3,4,e);px(ctx,8,4,e);px(ctx,9,4,e);
+    // mouth
+    for(let x=3;x<9;x++) px(ctx,x,8,k);
+    px(ctx,3,7,k);px(ctx,8,7,k);
+    // legs
+    if (frame===0) {
+      for(let y=12;y<14;y++) { px(ctx,2,y,dg);px(ctx,3,y,dg);px(ctx,8,y,dg);px(ctx,9,y,dg); }
+    } else {
+      px(ctx,1,12,dg);px(ctx,2,12,dg);px(ctx,9,12,dg);px(ctx,10,12,dg);
+      px(ctx,1,13,dg);px(ctx,2,13,dg);px(ctx,9,13,dg);px(ctx,10,13,dg);
+    }
+    return c;
+  }
+  SPRITES['enemy_0'] = makeEnemy(0);
+  SPRITES['enemy_1'] = makeEnemy(1);
+
+  // Trophy — 10×12 px gold
+  const tC = makeCanvas(10,12);
+  const tCtx = tC.getContext('2d');
+  [[3,0],[4,0],[5,0],[6,0],
+   [2,1],[3,1],[4,1],[5,1],[6,1],[7,1],
+   [2,2],[7,2],[2,3],[7,3],
+   [3,4],[4,4],[5,4],[6,4],
+   [4,5],[5,5],[4,6],[5,6],
+   [2,7],[3,7],[4,7],[5,7],[6,7],[7,7],
+   [1,8],[2,8],[3,8],[4,8],[5,8],[6,8],[7,8],[8,8],
+  ].forEach(([x,y])=>{ tCtx.fillStyle='#ffcc00'; tCtx.fillRect(x,y,1,1); });
+  [[3,1],[4,1],[5,1],[3,2],[4,2]].forEach(([x,y])=>{ tCtx.fillStyle='#ffee88'; tCtx.fillRect(x,y,1,1); });
+  SPRITES['trophy'] = tC;
+
+  // Key — 8×10 px
+  const kC = makeCanvas(8,10);
+  const kCtx = kC.getContext('2d');
+  [[2,0],[3,0],[4,0],[5,0],[1,1],[6,1],[1,2],[6,2],[1,3],[6,3],[2,4],[3,4],[4,4],[5,4],
+   [3,5],[3,6],[3,7],[3,8],[4,7],[5,7]].forEach(([x,y])=>{ kCtx.fillStyle='#ddaa00'; kCtx.fillRect(x,y,1,1); });
+  SPRITES['key'] = kC;
+
+  // Door — 16×24 px
+  const dC = makeCanvas(16,24);
+  const drCtx = dC.getContext('2d');
+  drCtx.fillStyle = '#663300';
+  drCtx.fillRect(0,0,16,24);
+  drCtx.fillStyle = '#994400';
+  for(let y=2;y<22;y+=4) drCtx.fillRect(2,y,12,2);
+  drCtx.fillStyle='#ffcc00'; drCtx.fillRect(11,11,2,2);
+  drCtx.fillStyle='#331100'; drCtx.fillRect(0,0,1,24); drCtx.fillRect(15,0,1,24);
+  SPRITES['door'] = dC;
+
+  // Door open
+  const doC = makeCanvas(16,24);
+  const doCtx = doC.getContext('2d');
+  doCtx.fillStyle='#001122'; doCtx.fillRect(0,0,16,24);
+  doCtx.fillStyle='#002244';
+  for(let y=0;y<24;y+=3) doCtx.fillRect(2,y,12,1);
+  doCtx.fillStyle='#004488'; doCtx.fillRect(7,10,2,4);
+  SPRITES['door_open'] = doC;
+
+  // Gun — 10×6 px
+  const gC = makeCanvas(10,6);
+  const gCtx = gC.getContext('2d');
+  [[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],[8,2],[9,2],
+   [2,1],[3,1],[4,1],[2,3],[3,3],[4,3],[5,0],[6,0],[7,0],[5,1],[6,1],[7,1]
+  ].forEach(([x,y])=>{ gCtx.fillStyle='#888888'; gCtx.fillRect(x,y,1,1); });
+  SPRITES['gun'] = gC;
+
+  // Jetpack — 10×14 px
+  const jpC = makeCanvas(10,14);
+  const jpCtx = jpC.getContext('2d');
+  jpCtx.fillStyle='#4466ff';
+  jpCtx.fillRect(2,0,6,10);
+  jpCtx.fillStyle='#ff4400';
+  jpCtx.fillRect(3,10,1,3); jpCtx.fillRect(6,10,1,3);
+  jpCtx.fillStyle='#ffcc00';
+  jpCtx.fillRect(3,11,1,2); jpCtx.fillRect(6,11,1,2);
+  jpCtx.fillStyle='#aaccff';
+  jpCtx.fillRect(4,2,2,3);
+  SPRITES['jetpack'] = jpC;
+
+  // Extra life — 8×8 heart
+  const lC = makeCanvas(8,8);
+  const lCtx = lC.getContext('2d');
+  [[1,1],[2,1],[5,1],[6,1],[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],
+   [0,3],[1,3],[2,3],[3,3],[4,3],[5,3],[6,3],[7,3],
+   [1,4],[2,4],[3,4],[4,4],[5,4],[6,4],
+   [2,5],[3,5],[4,5],[5,5],[3,6],[4,6]
+  ].forEach(([x,y])=>{ lCtx.fillStyle='#ff2244'; lCtx.fillRect(x,y,1,1); });
+  SPRITES['life'] = lC;
+
+  // Bullet — 4×2 px
+  const bC = makeCanvas(4,2);
+  const bCtx = bC.getContext('2d');
+  bCtx.fillStyle='#ffff44'; bCtx.fillRect(0,0,4,2);
+  SPRITES['bullet'] = bC;
+
+  // Spike — 16×8 px
+  const spC = makeCanvas(16,8);
+  const spCtx = spC.getContext('2d');
+  for(let i=0;i<4;i++) {
+    spCtx.fillStyle='#aaaaaa';
+    spCtx.beginPath();
+    spCtx.moveTo(i*4+2,0); spCtx.lineTo(i*4,8); spCtx.lineTo(i*4+4,8);
+    spCtx.fill();
+    spCtx.fillStyle='#cccccc';
+    spCtx.fillRect(i*4+1,4,2,1);
+  }
+  SPRITES['spike'] = spC;
+
+  // Solid tile — 16×16 px
+  function makeTile(bg, hi, sh) {
+    const c = makeCanvas(16,16);
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = bg; ctx.fillRect(0,0,16,16);
+    ctx.fillStyle = hi;
+    ctx.fillRect(0,0,16,1); ctx.fillRect(0,0,1,16);
+    ctx.fillStyle = sh;
+    ctx.fillRect(0,15,16,1); ctx.fillRect(15,0,1,16);
+    return c;
+  }
+  SPRITES['tile_solid']  = makeTile('#5566aa','#8899cc','#334488');
+  SPRITES['tile_brick']  = makeTile('#884422','#aa6644','#553311');
+  SPRITES['tile_hazard'] = makeTile('#cc2200','#ff4400','#881100');
+
+  // Stars / background particles stored separately
+  SPRITES['ready'] = true;
+})();
+
+// ══════════════════════════════════════════════════════════════════
+//  GAME STATE
+// ══════════════════════════════════════════════════════════════════
+const G = {
+  canvas: null, ctx: null,
+  state: 'menu',   // menu | playing | editor | gameover
+  score: 0,
+  hiScore: parseInt(localStorage.getItem('dd_hi') || '0'),
+  lives: 3,
+  level: 0,
+  hasGun: false,
+  hasJetpack: false,
+  hasKey: false,
+  trophiesLeft: 0,
+  doorOpen: false,
+
+  // Camera
+  camX: 0,
+
+  // Current level data
+  map: null,
+  mapW: 0, mapH: 0,
+  bgColor: '#000',
+  spawnX: 0, spawnY: 0,
+
+  // Objects
+  player: null,
+  enemies: [],
+  items: [],
+  bullets: [],
+  particles: [],
+
+  // Input
+  keys: {},
+  invTimer: 0,    // player invincibility frames
+  levelTransTimer: 0,
+};
+
+// ── Player ────────────────────────────────────────────────────────
+function makePlayer(x, y) {
+  return {
+    x, y,
+    vx: 0, vy: 0,
+    w: 12, h: 16,    // logical size (pixels)
+    dir: 1,
+    onGround: false,
+    frame: 0,
+    frameTimer: 0,
+    dead: false,
+    jetFuel: 0,
+    shooting: false,
+    shootCooldown: 0,
+  };
+}
+
+// ── Enemy ─────────────────────────────────────────────────────────
+function makeEnemy(tx, ty) {
+  return {
+    x: tx * TILE_SIZE,
+    y: ty * TILE_SIZE,
+    vx: 1.2,
+    vy: 0,
+    w: 12, h: 14,
+    dir: 1,
+    frame: 0,
+    frameTimer: 0,
+    dead: false,
+    deadTimer: 0,
+    startX: tx * TILE_SIZE,
+    patrolRange: 80,
+  };
+}
+
+// ── Item ──────────────────────────────────────────────────────────
+function makeItem(type, tx, ty) {
+  return { type, x: tx * TILE_SIZE, y: ty * TILE_SIZE, collected: false, bobTimer: 0 };
+}
+
+// ── Bullet ────────────────────────────────────────────────────────
+function makeBullet(x, y, dir) {
+  return { x, y, vx: dir * 10, vy: 0, dead: false };
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  LEVEL LOADER
+// ══════════════════════════════════════════════════════════════════
+function loadLevel(idx) {
+  const ld = LEVELS[idx];
+  G.mapH = ld.tiles.length;
+  G.mapW = ld.tiles[0].length;
+  G.bgColor = ld.bgColor || '#000';
+
+  // Deep copy tiles
+  G.map = ld.tiles.map(row => [...row]);
+
+  G.enemies = [];
+  G.items = [];
+  G.bullets = [];
+  G.particles = [];
+  G.trophiesLeft = 0;
+  G.hasKey = false;
+  G.doorOpen = false;
+  G.hasJetpack = false;
+  G.camX = 0;
+
+  // Parse special tiles
+  for (let row = 0; row < G.mapH; row++) {
+    for (let col = 0; col < G.mapW; col++) {
+      const t = G.map[row][col];
+      if (t === 12) { // spawn
+        G.spawnX = col * TILE_SIZE;
+        G.spawnY = row * TILE_SIZE;
+        G.map[row][col] = 0;
+      } else if (t === 11) { // enemy
+        G.enemies.push(makeEnemy(col, row));
+        G.map[row][col] = 0;
+      } else if (t === 4) {
+        G.items.push(makeItem('trophy', col, row));
+        G.trophiesLeft++;
+        G.map[row][col] = 0;
+      } else if (t === 5) {
+        G.items.push(makeItem('key', col, row));
+        G.map[row][col] = 0;
+      } else if (t === 6) {
+        G.items.push(makeItem('door', col, row));
+        G.map[row][col] = 0;
+      } else if (t === 7) {
+        G.items.push(makeItem('gun', col, row));
+        G.map[row][col] = 0;
+      } else if (t === 14) {
+        G.items.push(makeItem('jetpack', col, row));
+        G.map[row][col] = 0;
+      } else if (t === 15) {
+        G.items.push(makeItem('life', col, row));
+        G.map[row][col] = 0;
+      }
+    }
+  }
+
+  G.player = makePlayer(G.spawnX, G.spawnY);
+  if (!G.hasGun) G.hasGun = false;
+  G.invTimer = 0;
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  COLLISION HELPERS
+// ══════════════════════════════════════════════════════════════════
+function tileAt(px, py) {
+  const col = Math.floor(px / TILE_SIZE);
+  const row = Math.floor(py / TILE_SIZE);
+  if (col < 0 || col >= G.mapW || row < 0 || row >= G.mapH) return 1; // treat OOB as solid
+  return G.map[row][col];
+}
+
+function isSolid(px, py) { return TF.isSolid(tileAt(px, py)); }
+
+function rectOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
+  return ax < bx+bw && ax+aw > bx && ay < by+bh && ay+ah > by;
+}
+
+// ── Resolve entity movement with tile collision ───────────────────
+function moveEntity(ent, gravity = true) {
+  const spd = 1; // sub-step iterations
+  const TS = TILE_SIZE;
+
+  if (gravity) ent.vy = Math.min(ent.vy + 0.45, 12);
+
+  // Horizontal
+  ent.x += ent.vx;
+  // Check corners
+  const left  = ent.x;
+  const right = ent.x + ent.w - 1;
+  const top   = ent.y;
+  const bot   = ent.y + ent.h - 1;
+
+  if (ent.vx > 0 && (isSolid(right, top+2) || isSolid(right, bot-2))) {
+    ent.x = Math.floor(right / TS) * TS - ent.w;
+    ent.vx = 0;
+  }
+  if (ent.vx < 0 && (isSolid(left, top+2) || isSolid(left, bot-2))) {
+    ent.x = Math.ceil(left / TS) * TS;
+    ent.vx = 0;
+  }
+
+  // Vertical
+  ent.y += ent.vy;
+  const left2  = ent.x;
+  const right2 = ent.x + ent.w - 1;
+  const top2   = ent.y;
+  const bot2   = ent.y + ent.h - 1;
+
+  ent.onGround = false;
+  if (ent.vy >= 0 && (isSolid(left2+2, bot2) || isSolid(right2-2, bot2))) {
+    ent.y = Math.floor(bot2 / TS) * TS - ent.h;
+    ent.vy = 0;
+    ent.onGround = true;
+  }
+  if (ent.vy < 0 && (isSolid(left2+2, top2) || isSolid(right2-2, top2))) {
+    ent.y = Math.ceil(top2 / TS) * TS;
+    ent.vy = 0;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  PLAYER UPDATE
+// ══════════════════════════════════════════════════════════════════
+function updatePlayer(dt) {
+  const p = G.player;
+  if (p.dead) return;
+
+  const speed = 2.8;
+  let moving = false;
+
+  // Horizontal
+  if (G.keys['ArrowLeft'] || G.keys['KeyA']) {
+    p.vx = -speed; p.dir = -1; moving = true;
+  } else if (G.keys['ArrowRight'] || G.keys['KeyD']) {
+    p.vx = speed; p.dir = 1; moving = true;
+  } else {
+    p.vx *= 0.7;
+    if (Math.abs(p.vx) < 0.1) p.vx = 0;
+  }
+
+  // Jump / jetpack
+  if (G.hasJetpack && p.jetFuel > 0) {
+    if (G.keys['Space'] || G.keys['ArrowUp']) {
+      p.vy = -3.5;
+      p.jetFuel = Math.max(0, p.jetFuel - 1.5);
+      spawnParticle(p.x + p.w/2, p.y + p.h, '#ff6600', 0, 2);
+    }
+  } else if (G.keys['Space'] || G.keys['ArrowUp']) {
+    if (p.onGround) {
+      p.vy = -9;
+      sfxJump();
+      G.keys['Space'] = false;
+      G.keys['ArrowUp'] = false;
+    }
+  }
+
+  // Shoot
+  if ((G.keys['ControlLeft'] || G.keys['ControlRight'] || G.keys['KeyZ']) && G.hasGun) {
+    if (p.shootCooldown <= 0) {
+      G.bullets.push(makeBullet(
+        p.x + (p.dir === 1 ? p.w : -4),
+        p.y + 5, p.dir
+      ));
+      sfxShoot();
+      p.shootCooldown = 12;
+    }
+  }
+  if (p.shootCooldown > 0) p.shootCooldown--;
+
+  // Jetpack recharge when on ground
+  if (p.onGround && G.hasJetpack) p.jetFuel = Math.min(100, p.jetFuel + 0.5);
+
+  moveEntity(p);
+
+  // Keep in map bounds
+  if (p.x < 0) { p.x = 0; p.vx = 0; }
+  if (p.x + p.w > G.mapW * TILE_SIZE) { p.x = G.mapW * TILE_SIZE - p.w; p.vx = 0; }
+
+  // Camera follow
+  const targetCamX = p.x - CANVAS_W / 2 + (p.w * TILE_SIZE) / 2;
+  G.camX += (targetCamX - G.camX) * 0.15;
+  G.camX = Math.max(0, Math.min(G.camX, G.mapW * TILE_SIZE - CANVAS_W));
+
+  // Animation
+  if (moving || !p.onGround) {
+    p.frameTimer++;
+    if (p.frameTimer > 6) { p.frame = (p.frame + 1) % 4; p.frameTimer = 0; }
+  } else {
+    p.frame = 0;
+  }
+
+  // Death tiles
+  if (G.invTimer <= 0) {
+    const tx = Math.floor((p.x + p.w/2) / TILE_SIZE);
+    const ty = Math.floor((p.y + p.h - 1) / TILE_SIZE);
+    if (TF.isKill(tileAt(p.x + p.w/2, p.y + p.h - 2))) killPlayer();
+    if (TF.isKill(tileAt(p.x + p.w/2, p.y))) killPlayer();
+  }
+
+  // Fall out of world
+  if (p.y > G.mapH * TILE_SIZE + 64) killPlayer();
+
+  if (G.invTimer > 0) G.invTimer--;
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  ITEM PICKUP
+// ══════════════════════════════════════════════════════════════════
+function updateItems() {
+  const p = G.player;
+  if (p.dead) return;
+
+  for (const item of G.items) {
+    if (item.collected) continue;
+    item.bobTimer += 0.06;
+
+    if (!rectOverlap(p.x, p.y, p.w, p.h, item.x, item.y, TILE_SIZE, TILE_SIZE)) continue;
+
+    item.collected = true;
+    sfxCollect();
+
+    switch(item.type) {
+      case 'trophy':
+        G.score += 500;
+        G.trophiesLeft--;
+        addScoreParticle(item.x, item.y, '+500');
+        break;
+      case 'key':
+        G.hasKey = true;
+        showMsg('KEY!');
+        addScoreParticle(item.x, item.y, 'KEY!');
+        break;
+      case 'door':
+        if (G.hasKey && G.trophiesLeft === 0) {
+          sfxDoor();
+          showMsg('NEXT LEVEL!');
+          G.doorOpen = true;
+          G.score += 1000;
+          G.levelTransTimer = 120;
+        } else if (!G.hasKey) {
+          item.collected = false; // can't enter yet
+          showMsg('NEED KEY!');
+        } else {
+          item.collected = false;
+          showMsg(`${G.trophiesLeft} TROPHIES LEFT!`);
+        }
+        break;
+      case 'gun':
+        G.hasGun = true;
+        showMsg('GUN!');
+        addScoreParticle(item.x, item.y, 'GUN!');
+        break;
+      case 'jetpack':
+        G.hasJetpack = true;
+        p.jetFuel = 100;
+        showMsg('JETPACK!');
+        break;
+      case 'life':
+        G.lives++;
+        showMsg('+1 UP!');
+        addScoreParticle(item.x, item.y, '+1 UP!');
+        break;
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  ENEMIES
+// ══════════════════════════════════════════════════════════════════
+function updateEnemies() {
+  const p = G.player;
+
+  for (const e of G.enemies) {
+    if (e.dead) {
+      e.deadTimer--;
+      if (e.deadTimer <= 0) e.dead = false; // optional: respawn? Keep dead for simplicity
+      continue;
+    }
+
+    e.vx = e.dir * 1.4;
+    moveEntity(e);
+
+    // Patrol reversal
+    if (e.vx === 0 || !e.onGround) {
+      e.dir *= -1;
+      e.x += e.dir * 2;
+    }
+    // Patrol range
+    if (Math.abs(e.x - e.startX) > e.patrolRange) e.dir *= -1;
+
+    // Animation
+    e.frameTimer++;
+    if (e.frameTimer > 8) { e.frame = (e.frame+1)%2; e.frameTimer = 0; }
+
+    // Kill player
+    if (G.invTimer <= 0 && !p.dead &&
+        rectOverlap(p.x+2, p.y+2, p.w-4, p.h-4, e.x, e.y, e.w, e.h)) {
+      killPlayer();
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  BULLETS
+// ══════════════════════════════════════════════════════════════════
+function updateBullets() {
+  for (const b of G.bullets) {
+    if (b.dead) continue;
+    b.x += b.vx;
+
+    // Hit wall
+    if (isSolid(b.x, b.y) || isSolid(b.x, b.y+1)) {
+      b.dead = true;
+      spawnParticle(b.x, b.y, '#ffff44', 0, 0);
+      continue;
+    }
+    // Off screen
+    if (b.x < G.camX - 32 || b.x > G.camX + CANVAS_W + 32) { b.dead = true; continue; }
+
+    // Hit enemy
+    for (const e of G.enemies) {
+      if (e.dead) continue;
+      if (rectOverlap(b.x, b.y, 4, 2, e.x, e.y, e.w, e.h)) {
+        b.dead = true;
+        e.dead = true;
+        e.deadTimer = 30;
+        G.score += 300;
+        addScoreParticle(e.x, e.y, '+300');
+        for (let i=0;i<6;i++) spawnParticle(e.x+6, e.y+7, '#44cc44', (Math.random()-0.5)*3, -Math.random()*3);
+        sfxCollect();
+      }
+    }
+  }
+  // Prune
+  G.bullets = G.bullets.filter(b => !b.dead);
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  PARTICLES
+// ══════════════════════════════════════════════════════════════════
+function spawnParticle(x, y, color, vx, vy) {
+  G.particles.push({ x, y, vx: vx+(Math.random()-0.5)*1.5, vy: vy-Math.random()*1.5, color, life: 20+Math.random()*20, maxLife: 30 });
+}
+function addScoreParticle(x, y, txt) {
+  G.particles.push({ x, y, vx: 0, vy: -0.8, color:'#ffcc00', life:60, maxLife:60, text:txt });
+}
+function updateParticles() {
+  for (const p of G.particles) {
+    p.x += p.vx; p.y += p.vy;
+    p.vy += 0.1;
+    p.life--;
+  }
+  G.particles = G.particles.filter(p => p.life > 0);
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  DEATH / RESPAWN
+// ══════════════════════════════════════════════════════════════════
+function killPlayer() {
+  if (G.invTimer > 0 || G.player.dead) return;
+  sfxDie();
+  G.player.dead = true;
+  G.lives--;
+  for (let i=0;i<12;i++) spawnParticle(G.player.x+6, G.player.y+8, '#ff4444', (Math.random()-0.5)*4, -Math.random()*4);
+
+  setTimeout(() => {
+    if (G.lives <= 0) {
+      if (G.score > G.hiScore) { G.hiScore = G.score; localStorage.setItem('dd_hi', G.hiScore); }
+      switchState('gameover');
+    } else {
+      G.player = makePlayer(G.spawnX, G.spawnY);
+      G.hasGun = false;
+      G.hasJetpack = false;
+      G.invTimer = 120;
+      showMsg('READY!');
+    }
+  }, 1500);
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════════════════════════════
+function render() {
+  const ctx = G.ctx;
+  ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+
+  // Background
+  ctx.fillStyle = G.bgColor;
+  ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+  // Stars
+  drawStars(ctx);
+
+  const cx = Math.floor(G.camX);
+
+  // ── Tiles ──
+  const startCol = Math.floor(cx / TILE_SIZE);
+  const endCol   = startCol + COLS_VIS + 2;
+
+  for (let row = 0; row < G.mapH; row++) {
+    for (let col = startCol; col <= endCol; col++) {
+      if (col < 0 || col >= G.mapW) continue;
+      const t = G.map[row][col];
+      if (t === 0) continue;
+
+      const sx = col * TILE_SIZE - cx;
+      const sy = row * TILE_SIZE;
+
+      if (t === 3) { // spike
+        ctx.save();
+        ctx.translate(sx, sy + TILE_SIZE - 8*2);
+        ctx.scale(2, 2);
+        ctx.drawImage(SPRITES['spike'], 0, 0);
+        ctx.restore();
+      } else if (t === 8) { // hazard
+        ctx.save();
+        ctx.translate(sx, sy);
+        ctx.scale(2, 2);
+        ctx.drawImage(SPRITES['tile_hazard'], 0, 0);
+        ctx.restore();
+      } else if (t === 2) {
+        ctx.save(); ctx.translate(sx, sy); ctx.scale(2,2);
+        ctx.drawImage(SPRITES['tile_brick'],0,0); ctx.restore();
+      } else { // solid
+        ctx.save(); ctx.translate(sx, sy); ctx.scale(2,2);
+        ctx.drawImage(SPRITES['tile_solid'],0,0); ctx.restore();
+      }
+    }
+  }
+
+  // ── Items ──
+  for (const item of G.items) {
+    if (item.collected) continue;
+    const sx = item.x - cx;
+    if (sx < -TILE_SIZE || sx > CANVAS_W + TILE_SIZE) continue;
+    const bob = Math.sin(item.bobTimer) * 3;
+
+    ctx.save();
+    const sy = item.y + bob;
+    ctx.translate(sx, sy);
+
+    switch(item.type) {
+      case 'trophy':
+        ctx.scale(2.8, 2.8);
+        ctx.drawImage(SPRITES['trophy'], 0, 0);
+        // Glow
+        ctx.restore();
+        ctx.save();
+        ctx.globalAlpha = 0.3 + Math.abs(Math.sin(item.bobTimer)) * 0.2;
+        ctx.shadowColor = '#ffcc00';
+        ctx.shadowBlur = 12;
+        ctx.translate(sx, sy);
+        ctx.scale(2.8,2.8); ctx.drawImage(SPRITES['trophy'],0,0);
+        break;
+      case 'key':
+        ctx.scale(3,3); ctx.drawImage(SPRITES['key'],0,0); break;
+      case 'door':
+        ctx.scale(2,1.33); ctx.drawImage(SPRITES['door_open'],0,0); break;
+      case 'gun':
+        ctx.scale(3,3); ctx.drawImage(SPRITES['gun'],0,0); break;
+      case 'jetpack':
+        ctx.scale(3,2); ctx.drawImage(SPRITES['jetpack'],0,0); break;
+      case 'life':
+        ctx.scale(4,4); ctx.drawImage(SPRITES['life'],0,0); break;
+    }
+    ctx.restore();
+  }
+
+  // ── Enemies ──
+  for (const e of G.enemies) {
+    if (e.dead) continue;
+    const sx = e.x - cx;
+    if (sx < -32 || sx > CANVAS_W + 32) continue;
+    ctx.save();
+    ctx.translate(sx, e.y);
+    if (e.dir === -1) { ctx.scale(-1,1); ctx.translate(-e.w*2, 0); }
+    ctx.scale(2.2, 2.2);
+    ctx.drawImage(SPRITES[`enemy_${e.frame}`], 0, 0);
+    ctx.restore();
+  }
+
+  // ── Bullets ──
+  for (const b of G.bullets) {
+    const sx = b.x - cx;
+    ctx.save();
+    ctx.shadowColor='#ffff88'; ctx.shadowBlur=8;
+    ctx.scale(2,2);
+    ctx.drawImage(SPRITES['bullet'], Math.floor(sx/2), Math.floor(b.y/2));
+    ctx.restore();
+  }
+
+  // ── Player ──
+  const p = G.player;
+  const psx = p.x - cx;
+  if (!p.dead) {
+    ctx.save();
+    if (G.invTimer > 0 && Math.floor(G.invTimer/4)%2 === 0) ctx.globalAlpha = 0.3;
+    ctx.translate(psx, p.y);
+    if (p.dir === -1) { ctx.scale(-1,1); ctx.translate(-p.w*2.5, 0); }
+    ctx.scale(2.5,2);
+    ctx.drawImage(SPRITES[`Janzi_${p.frame}_1`], 0, 0);
+    ctx.restore();
+  } else {
+    ctx.save();
+    ctx.translate(psx, p.y);
+    ctx.scale(2.5,2);
+    ctx.drawImage(SPRITES['Janzi_dead'], 0, 0);
+    ctx.restore();
+  }
+
+  // ── Particles ──
+  for (const pt of G.particles) {
+    if (pt.text) {
+      ctx.globalAlpha = pt.life / pt.maxLife;
+      ctx.fillStyle = pt.color;
+      ctx.font = '7px "Press Start 2P", monospace';
+      ctx.fillText(pt.text, pt.x - cx, pt.y);
+      ctx.globalAlpha = 1;
+    } else {
+      ctx.globalAlpha = pt.life / pt.maxLife;
+      ctx.fillStyle = pt.color;
+      ctx.fillRect(Math.floor(pt.x - cx), Math.floor(pt.y), 3, 3);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  updateHUD();
+}
+
+// ── Static star field ─────────────────────────────────────────────
+const STARS = Array.from({length:60}, ()=>({
+  x: Math.random()*CANVAS_W, y: Math.random()*CANVAS_H,
+  r: Math.random()*1.5+0.5, a: Math.random()*0.7+0.1,
+  parallax: Math.random()*0.3
+}));
+
+function drawStars(ctx) {
+  for (const s of STARS) {
+    const sx = ((s.x - G.camX * s.parallax) % CANVAS_W + CANVAS_W) % CANVAS_W;
+    ctx.globalAlpha = s.a;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(sx, s.y, s.r, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+// ── HUD update ────────────────────────────────────────────────────
+function updateHUD() {
+  document.getElementById('hud-score').textContent   = String(G.score).padStart(7,'0');
+  document.getElementById('hud-hi').textContent      = String(G.hiScore).padStart(7,'0');
+  document.getElementById('hud-lives').textContent   = '♥'.repeat(Math.max(0,G.lives));
+  document.getElementById('hud-level').textContent   = LEVELS[G.level].name;
+  document.getElementById('hud-trophy').textContent  = G.trophiesLeft;
+  document.getElementById('hud-gun').textContent     = G.hasGun ? 'YES' : 'NO';
+  document.getElementById('hud-key').textContent     = G.hasKey ? 'YES' : 'NO';
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  MESSAGE OVERLAY
+// ══════════════════════════════════════════════════════════════════
+function showMsg(txt, duration=90) {
+  G.msgText = txt;
+  G.msgTimer = duration;
+  const el = document.getElementById('msg-overlay');
+  el.textContent = txt;
+  el.classList.add('visible');
+}
+function clearMsg() {
+  G.msgText = '';
+  G.msgTimer = 0;
+  document.getElementById('msg-overlay').classList.remove('visible');
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  MAIN LOOP
+// ══════════════════════════════════════════════════════════════════
+function gameLoop(ts) {
+  if (G.state !== 'playing') return;
+  G.animFrame = requestAnimationFrame(gameLoop);
+
+  const dt = Math.min((ts - G.lastTime) / 16.67, 3);
+  G.lastTime = ts;
+  G.frameCount++;
+
+  updatePlayer(dt);
+  updateEnemies();
+  updateBullets();
+  updateItems();
+  updateParticles();
+
+  if (G.msgTimer > 0) {
+    G.msgTimer--;
+    if (G.msgTimer === 0) clearMsg();
+  }
+
+  if (G.levelTransTimer > 0) {
+    G.levelTransTimer--;
+    if (G.levelTransTimer === 0) {
+      G.level++;
+      if (G.level >= LEVELS.length) {
+        // Completed all levels!
+        G.level = 0;
+        if (G.score > G.hiScore) { G.hiScore = G.score; localStorage.setItem('dd_hi', G.hiScore); }
+        switchState('gameover');
+        return;
+      }
+      sfxLevelUp();
+      loadLevel(G.level);
+      showMsg(LEVELS[G.level].name, 120);
+    }
+  }
+
+  render();
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  STATE MANAGEMENT
+// ══════════════════════════════════════════════════════════════════
+function switchState(state) {
+  cancelAnimationFrame(G.animFrame);
+  G.state = state;
+
+  document.querySelectorAll('[id^="screen-"]').forEach(s => s.classList.remove('active'));
+
+  if (state === 'menu') {
+    document.getElementById('screen-menu').classList.add('active');
+    document.getElementById('menu-hi').innerHTML = `HI-SCORE: <span>${String(G.hiScore).padStart(7,'0')}</span>`;
+  } else if (state === 'playing') {
+    document.getElementById('screen-game').classList.add('active');
+    G.lastTime = performance.now();
+    showMsg(LEVELS[G.level].name, 120);
+    G.animFrame = requestAnimationFrame(gameLoop);
+  } else if (state === 'editor') {
+    document.getElementById('screen-editor').classList.add('active');
+    initEditor();
+  } else if (state === 'gameover') {
+    document.getElementById('screen-gameover').classList.add('active');
+    document.getElementById('go-score').textContent = String(G.score).padStart(7,'0');
+    document.getElementById('go-hi').textContent    = String(G.hiScore).padStart(7,'0');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  LEVEL EDITOR
+// ══════════════════════════════════════════════════════════════════
+let ED = {
+  levelIdx: 0,
+  selectedTile: 1,
+  painting: false,
+  erasing: false,
+  zoom: 2,
+  map: null,
+  mapW: 0,
+  mapH: 0,
+  canvas: null,
+  ctx: null,
+};
+
+const TILE_NAMES = {
+  0:'Empty', 1:'Ground', 2:'Brick', 3:'Spike', 4:'Trophy', 5:'Key',
+  6:'Door', 7:'Gun', 8:'Lava', 9:'Ladder', 10:'Platform', 11:'Enemy',
+  12:'Spawn', 14:'Jetpack', 15:'Life'
+};
+
+const TILE_COLORS = {
+  0:'#000', 1:'#5566aa', 2:'#884422', 3:'#888888', 4:'#ffcc00',
+  5:'#ddaa00', 6:'#663300', 7:'#888888', 8:'#cc2200', 9:'#226622',
+  10:'#445544', 11:'#44cc44', 12:'#00aaff', 14:'#4466ff', 15:'#ff2244'
+};
+
+function initEditor() {
+  ED.canvas = document.getElementById('editorCanvas');
+  ED.ctx = ED.canvas.getContext('2d');
+  ED.levelIdx = 0;
+  loadEditorLevel(0);
+  buildPalette();
+  renderEditor();
+}
+
+function loadEditorLevel(idx) {
+  const ld = LEVELS[idx];
+  ED.mapH = ld.tiles.length;
+  ED.mapW = ld.tiles[0].length;
+  ED.map = ld.tiles.map(r => [...r]);
+  ED.canvas.width  = ED.mapW * TILE_SIZE;
+  ED.canvas.height = ED.mapH * TILE_SIZE;
+  renderEditor();
+}
+
+function buildPalette() {
+  const pal = document.getElementById('tile-palette');
+  pal.innerHTML = '';
+  const tileList = [0,1,2,3,4,5,6,7,8,11,12,14,15];
+  for (const tid of tileList) {
+    const c = document.createElement('canvas');
+    c.width = 32; c.height = 32;
+    c.title = TILE_NAMES[tid] || tid;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = TILE_COLORS[tid] || '#333';
+    ctx.fillRect(0,0,32,32);
+    ctx.fillStyle = '#ffffff44';
+    ctx.font = '7px monospace';
+    ctx.fillText(TILE_NAMES[tid]?.slice(0,3) || tid, 2, 22);
+    c.className = 'tile-btn' + (tid === ED.selectedTile ? ' selected' : '');
+    c.addEventListener('click', () => {
+      ED.selectedTile = tid;
+      document.querySelectorAll('.tile-btn').forEach(b => b.classList.remove('selected'));
+      c.classList.add('selected');
+    });
+    pal.appendChild(c);
+  }
+}
+
+function renderEditor() {
+  if (!ED.ctx) return;
+  const ctx = ED.ctx;
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0,0,ED.canvas.width, ED.canvas.height);
+
+  for (let row=0; row<ED.mapH; row++) {
+    for (let col=0; col<ED.mapW; col++) {
+      const t = ED.map[row][col];
+      const x = col * TILE_SIZE;
+      const y = row * TILE_SIZE;
+      ctx.fillStyle = TILE_COLORS[t] || '#111';
+      ctx.fillRect(x,y,TILE_SIZE,TILE_SIZE);
+      ctx.strokeStyle = '#1a1a2e';
+      ctx.strokeRect(x,y,TILE_SIZE,TILE_SIZE);
+      if (t !== 0) {
+        ctx.fillStyle = '#ffffff33';
+        ctx.font = '7px monospace';
+        ctx.fillText(t, x+2, y+12);
+      }
+    }
+  }
+}
+
+function editorPaint(ex, ey) {
+  const rect = ED.canvas.getBoundingClientRect();
+  const scaleX = ED.canvas.width / rect.width;
+  const scaleY = ED.canvas.height / rect.height;
+  const x = (ex - rect.left) * scaleX;
+  const y = (ey - rect.top)  * scaleY;
+  const col = Math.floor(x / TILE_SIZE);
+  const row = Math.floor(y / TILE_SIZE);
+  if (col >= 0 && col < ED.mapW && row >= 0 && row < ED.mapH) {
+    ED.map[row][col] = ED.erasing ? 0 : ED.selectedTile;
+    renderEditor();
+    document.getElementById('ed-coords').textContent = `Col:${col} Row:${row} Tile:${TILE_NAMES[ED.map[row][col]]||ED.map[row][col]}`;
+  }
+}
+
+function exportLevel() {
+  const json = JSON.stringify({
+    name: LEVELS[ED.levelIdx].name,
+    width: ED.mapW, height: ED.mapH,
+    tiles: ED.map
+  }, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `level_${ED.levelIdx+1}.json`;
+  a.click();
+}
+
+function importLevel(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      LEVELS[ED.levelIdx].tiles = data.tiles;
+      LEVELS[ED.levelIdx].name  = data.name || LEVELS[ED.levelIdx].name;
+      loadEditorLevel(ED.levelIdx);
+    } catch(err) { alert('Invalid JSON'); }
+  };
+  reader.readAsText(file);
+}
+
+function playTestLevel() {
+  // Patch current editor map into the game
+  LEVELS[ED.levelIdx].tiles = ED.map.map(r=>[...r]);
+  G.level = ED.levelIdx;
+  G.score = 0; G.lives = 3; G.hasGun = false; G.hasJetpack = false;
+  loadLevel(G.level);
+  switchState('playing');
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  INPUT
+// ══════════════════════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  G.keys[e.code] = true;
+  if (['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)) {
+    if (G.state === 'playing') e.preventDefault();
+  }
+  if (e.code === 'ControlLeft' || e.code === 'ControlRight') e.preventDefault();
+  if (e.code === 'Escape' && G.state === 'playing') {
+    cancelAnimationFrame(G.animFrame);
+    G.state = 'menu';
+    switchState('menu');
+  }
+});
+document.addEventListener('keyup', e => { G.keys[e.code] = false; });
+
+// ══════════════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════════════
+window.addEventListener('load', () => {
+  G.canvas = document.getElementById('gameCanvas');
+  G.ctx = G.canvas.getContext('2d');
+  G.canvas.width  = CANVAS_W;
+  G.canvas.height = CANVAS_H;
+
+  // ── Button wiring ──
+  document.getElementById('btn-play').addEventListener('click', () => {
+    G.score = 0; G.lives = 3; G.level = 0; G.hasGun = false; G.hasJetpack = false;
+    loadLevel(0);
+    switchState('playing');
+  });
+  document.getElementById('btn-editor').addEventListener('click', () => switchState('editor'));
+  document.getElementById('btn-menu').addEventListener('click', () => switchState('menu'));
+  document.getElementById('btn-gomenu').addEventListener('click', () => switchState('menu'));
+  document.getElementById('btn-retry').addEventListener('click', () => {
+    G.score = 0; G.lives = 3; G.level = 0; G.hasGun = false; G.hasJetpack = false;
+    loadLevel(0);
+    switchState('playing');
+  });
+  document.getElementById('btn-ed-menu').addEventListener('click', () => switchState('menu'));
+  document.getElementById('btn-ed-play').addEventListener('click', playTestLevel);
+  document.getElementById('btn-ed-export').addEventListener('click', exportLevel);
+  document.getElementById('btn-ed-import').addEventListener('click', () => {
+    document.getElementById('ed-import-input').click();
+  });
+  document.getElementById('ed-import-input').addEventListener('change', importLevel);
+  document.getElementById('btn-ed-clear').addEventListener('click', () => {
+    ED.map = Array.from({length:ED.mapH}, () => Array(ED.mapW).fill(0));
+    renderEditor();
+  });
+  document.getElementById('btn-ed-fill').addEventListener('click', () => {
+    // Fill bottom 2 rows with ground
+    for (let col=0;col<ED.mapW;col++) {
+      ED.map[ED.mapH-1][col] = 1;
+      ED.map[ED.mapH-2][col] = 1;
+    }
+    renderEditor();
+  });
+
+  // Level selector in editor
+  const sel = document.getElementById('ed-level-select');
+  LEVELS.forEach((l,i) => {
+    const opt = document.createElement('option');
+    opt.value = i; opt.textContent = l.name;
+    sel.appendChild(opt);
+  });
+  sel.addEventListener('change', e => {
+    ED.levelIdx = parseInt(e.target.value);
+    loadEditorLevel(ED.levelIdx);
+  });
+
+  // Editor canvas events
+  const edWrap = document.getElementById('editor-canvas-wrap');
+  edWrap.addEventListener('mousedown', e => {
+    ED.painting = true;
+    ED.erasing = e.button === 2;
+    editorPaint(e.clientX, e.clientY);
+  });
+  edWrap.addEventListener('mousemove', e => {
+    if (ED.painting) editorPaint(e.clientX, e.clientY);
+  });
+  edWrap.addEventListener('mouseup', () => { ED.painting = false; });
+  edWrap.addEventListener('mouseleave', () => { ED.painting = false; });
+  edWrap.addEventListener('contextmenu', e => { e.preventDefault(); ED.erasing=true; editorPaint(e.clientX,e.clientY); return false; });
+
+  switchState('menu');
+});
+
+
+-- game.js --end
+
+
+-- style.css --start
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --crt-green: #00ff41;
+  --crt-amber: #ffb000;
+  --crt-red: #ff2020;
+  --bg-dark: #0a0a0f;
+  --bg-panel: #0d0d1a;
+  --border-glow: #1a1a3e;
+}
+
+body {
+  background: var(--bg-dark);
+  color: var(--crt-green);
+  font-family: 'Press Start 2P', monospace;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  overflow-x: hidden;
+  image-rendering: pixelated;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.08) 2px,
+    rgba(0,0,0,0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── SCREENS ── */
+#screen-menu,
+#screen-game,
+#screen-editor,
+#screen-gameover {
+  display: none;
+  width: 100%;
+  max-width: 900px;
+  padding: 20px;
+}
+#screen-menu.active,
+#screen-game.active,
+#screen-editor.active,
+#screen-gameover.active {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ── MENU ── */
+.menu-title {
+  font-size: 28px;
+  color: var(--crt-amber);
+  text-shadow: 0 0 20px var(--crt-amber), 0 0 40px rgba(255,176,0,0.4);
+  margin: 40px 0 10px;
+  letter-spacing: 2px;
+  animation: flicker 4s infinite;
+}
+
+.menu-sub {
+  font-size: 9px;
+  color: #888;
+  margin-bottom: 50px;
+  letter-spacing: 4px;
+}
+
+@keyframes flicker {
+  0%,100% { opacity:1; }
+  92% { opacity:1; }
+  93% { opacity:0.7; }
+  94% { opacity:1; }
+  96% { opacity:0.8; }
+  97% { opacity:1; }
+}
+
+.menu-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+.btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  padding: 12px 32px;
+  background: transparent;
+  border: 2px solid var(--crt-green);
+  color: var(--crt-green);
+  cursor: pointer;
+  letter-spacing: 2px;
+  transition: all 0.1s;
+  position: relative;
+  text-transform: uppercase;
+}
+
+.btn::before {
+  content: '▶ ';
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+
+.btn:hover {
+  background: rgba(0,255,65,0.1);
+  box-shadow: 0 0 20px rgba(0,255,65,0.4), inset 0 0 20px rgba(0,255,65,0.05);
+  color: #fff;
+}
+.btn:hover::before { opacity: 1; }
+
+.btn-danger {
+  border-color: var(--crt-red);
+  color: var(--crt-red);
+}
+.btn-danger:hover {
+  background: rgba(255,32,32,0.1);
+  box-shadow: 0 0 20px rgba(255,32,32,0.4);
+  color: #fff;
+}
+
+.btn-amber {
+  border-color: var(--crt-amber);
+  color: var(--crt-amber);
+}
+.btn-amber:hover {
+  background: rgba(255,176,0,0.1);
+  box-shadow: 0 0 20px rgba(255,176,0,0.4);
+  color: #fff;
+}
+
+.menu-hi {
+  margin-top: 40px;
+  font-size: 9px;
+  color: #555;
+}
+.menu-hi span { color: var(--crt-amber); }
+
+/* ── HUD ── */
+#hud {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 760px;
+  padding: 8px 12px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-glow);
+  border-bottom: none;
+  font-size: 9px;
+  gap: 16px;
+}
+
+.hud-group {
+  display: flex;
+  gap: 20px;
+}
+
+.hud-item label {
+  color: #555;
+  display: block;
+  margin-bottom: 4px;
+}
+.hud-item span {
+  color: var(--crt-amber);
+}
+
+.hud-lives { color: var(--crt-red) !important; }
+
+/* ── CANVAS WRAPPER ── */
+#canvas-wrapper {
+  position: relative;
+  border: 2px solid var(--border-glow);
+  box-shadow: 0 0 40px rgba(0,100,255,0.1), inset 0 0 60px rgba(0,0,20,0.8);
+  image-rendering: pixelated;
+}
+
+#gameCanvas {
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+#msg-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--crt-amber);
+  text-shadow: 0 0 20px var(--crt-amber);
+  pointer-events: none;
+  text-align: center;
+  line-height: 2;
+  background: rgba(0,0,0,0.5);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+#msg-overlay.visible { opacity: 1; }
+
+/* ── CONTROLS HINT ── */
+#controls-hint {
+  width: 100%;
+  max-width: 760px;
+  font-size: 7px;
+  color: #333;
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-glow);
+  border-top: none;
+}
+#controls-hint span { color: #555; }
+
+/* ── GAME OVER ── */
+.gameover-title {
+  font-size: 24px;
+  color: var(--crt-red);
+  text-shadow: 0 0 30px var(--crt-red);
+  margin: 60px 0 30px;
+  animation: flicker 2s infinite;
+}
+.gameover-score {
+  font-size: 12px;
+  color: var(--crt-amber);
+  margin-bottom: 10px;
+}
+.gameover-hi {
+  font-size: 10px;
+  color: #555;
+  margin-bottom: 50px;
+}
+
+/* ── EDITOR ── */
+#editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-glow);
+  margin-bottom: 16px;
+}
+
+#editor-header h2 {
+  font-size: 11px;
+  color: var(--crt-amber);
+}
+
+#editor-layout {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  align-items: flex-start;
+}
+
+#editor-sidebar {
+  min-width: 180px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-glow);
+  padding: 12px;
+}
+
+#editor-sidebar h3 {
+  font-size: 8px;
+  color: #555;
+  margin-bottom: 12px;
+  letter-spacing: 2px;
+}
+
+.tile-palette {
+  display: grid;
+  grid-template-columns: repeat(3, 40px);
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.tile-btn {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #222;
+  cursor: pointer;
+  image-rendering: pixelated;
+  background: #111;
+  transition: border-color 0.1s;
+}
+.tile-btn:hover { border-color: #555; }
+.tile-btn.selected { border-color: var(--crt-green); }
+
+.tile-label {
+  font-size: 6px;
+  color: #444;
+  text-align: center;
+  margin-top: 2px;
+  margin-bottom: 8px;
+}
+
+#editor-canvas-wrap {
+  flex: 1;
+  overflow: auto;
+  border: 1px solid var(--border-glow);
+  cursor: crosshair;
+}
+
+#editorCanvas {
+  display: block;
+  image-rendering: pixelated;
+}
+
+#editor-tools {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ed-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  padding: 6px 10px;
+  background: transparent;
+  border: 1px solid #333;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+.ed-btn:hover {
+  border-color: var(--crt-green);
+  color: var(--crt-green);
+}
+
+#level-select {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  background: var(--bg-panel);
+  color: var(--crt-amber);
+  border: 1px solid var(--border-glow);
+  padding: 4px 8px;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+#level-select option {
+  background: var(--bg-panel);
+}
+
+.ed-coords {
+  font-size: 7px;
+  color: #333;
+  padding: 4px 0;
+}
+
+
+-- style.css --end
+
+
+
+-- dangerousgame.html --start
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DANGEROUS GAME</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --crt-green: #00ff41;
+  --crt-amber: #ffb000;
+  --crt-red: #ff2020;
+  --bg-dark: #0a0a0f;
+  --bg-panel: #0d0d1a;
+  --border-glow: #1a1a3e;
+}
+body {
+  background: var(--bg-dark);
+  color: var(--crt-green);
+  font-family: 'Press Start 2P', monospace;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  overflow-x: hidden;
+  image-rendering: pixelated;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px);
+  pointer-events: none;
+  z-index: 9999;
+}
+#screen-menu,#screen-game,#screen-editor,#screen-gameover { display: none; width: 100%; max-width: 900px; padding: 20px; }
+#screen-menu.active,#screen-game.active,#screen-editor.active,#screen-gameover.active { display: flex; flex-direction: column; align-items: center; }
+.menu-title { font-size: 28px; color: var(--crt-amber); text-shadow: 0 0 20px var(--crt-amber), 0 0 40px rgba(255,176,0,0.4); margin: 40px 0 10px; letter-spacing: 2px; animation: flicker 4s infinite; }
+.menu-sub { font-size: 9px; color: #888; margin-bottom: 50px; letter-spacing: 4px; }
+@keyframes flicker { 0%,100%{opacity:1}92%{opacity:1}93%{opacity:0.7}94%{opacity:1}96%{opacity:0.8}97%{opacity:1} }
+.menu-options { display: flex; flex-direction: column; gap: 16px; align-items: center; }
+.btn { font-family: 'Press Start 2P', monospace; font-size: 11px; padding: 12px 32px; background: transparent; border: 2px solid var(--crt-green); color: var(--crt-green); cursor: pointer; letter-spacing: 2px; transition: all 0.1s; position: relative; text-transform: uppercase; }
+.btn::before { content: '▶ '; opacity: 0; transition: opacity 0.1s; }
+.btn:hover { background: rgba(0,255,65,0.1); box-shadow: 0 0 20px rgba(0,255,65,0.4), inset 0 0 20px rgba(0,255,65,0.05); color: #fff; }
+.btn:hover::before { opacity: 1; }
+.btn-danger { border-color: var(--crt-red); color: var(--crt-red); }
+.btn-danger:hover { background: rgba(255,32,32,0.1); box-shadow: 0 0 20px rgba(255,32,32,0.4); color: #fff; }
+.btn-amber { border-color: var(--crt-amber); color: var(--crt-amber); }
+.btn-amber:hover { background: rgba(255,176,0,0.1); box-shadow: 0 0 20px rgba(255,176,0,0.4); color: #fff; }
+.menu-hi { margin-top: 40px; font-size: 9px; color: #555; }
+.menu-hi span { color: var(--crt-amber); }
+#hud { display: flex; justify-content: space-between; width: 100%; max-width: 760px; padding: 8px 12px; background: var(--bg-panel); border: 1px solid var(--border-glow); border-bottom: none; font-size: 9px; gap: 16px; }
+.hud-group { display: flex; gap: 20px; }
+.hud-item label { color: #555; display: block; margin-bottom: 4px; }
+.hud-item span { color: var(--crt-amber); }
+.hud-lives { color: var(--crt-red) !important; }
+#canvas-wrapper { position: relative; border: 2px solid var(--border-glow); box-shadow: 0 0 40px rgba(0,100,255,0.1), inset 0 0 60px rgba(0,0,20,0.8); image-rendering: pixelated; }
+#gameCanvas { display: block; image-rendering: pixelated; image-rendering: crisp-edges; }
+#msg-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--crt-amber); text-shadow: 0 0 20px var(--crt-amber); pointer-events: none; text-align: center; line-height: 2; background: rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.3s; }
+#msg-overlay.visible { opacity: 1; }
+#controls-hint { width: 100%; max-width: 760px; font-size: 7px; color: #333; display: flex; justify-content: space-between; padding: 6px 12px; background: var(--bg-panel); border: 1px solid var(--border-glow); border-top: none; }
+#controls-hint span { color: #555; }
+.gameover-title { font-size: 24px; color: var(--crt-red); text-shadow: 0 0 30px var(--crt-red); margin: 60px 0 30px; animation: flicker 2s infinite; }
+.gameover-score { font-size: 12px; color: var(--crt-amber); margin-bottom: 10px; }
+.gameover-hi { font-size: 10px; color: #555; margin-bottom: 50px; }
+#editor-header { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 10px 0; border-bottom: 1px solid var(--border-glow); margin-bottom: 16px; }
+#editor-header h2 { font-size: 11px; color: var(--crt-amber); }
+#editor-layout { display: flex; gap: 16px; width: 100%; align-items: flex-start; }
+#editor-sidebar { min-width: 180px; background: var(--bg-panel); border: 1px solid var(--border-glow); padding: 12px; }
+#editor-sidebar h3 { font-size: 8px; color: #555; margin-bottom: 12px; letter-spacing: 2px; }
+.tile-palette { display: grid; grid-template-columns: repeat(3, 40px); gap: 4px; margin-bottom: 16px; }
+.tile-btn { width: 40px; height: 40px; border: 2px solid #222; cursor: pointer; image-rendering: pixelated; background: #111; transition: border-color 0.1s; }
+.tile-btn:hover { border-color: #555; }
+.tile-btn.selected { border-color: var(--crt-green); }
+.tile-label { font-size: 6px; color: #444; text-align: center; margin-top: 2px; margin-bottom: 8px; }
+#editor-canvas-wrap { flex: 1; overflow: auto; border: 1px solid var(--border-glow); cursor: crosshair; }
+#editorCanvas { display: block; image-rendering: pixelated; }
+#editor-tools { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+.ed-btn { font-family: 'Press Start 2P', monospace; font-size: 7px; padding: 6px 10px; background: transparent; border: 1px solid #333; color: #555; cursor: pointer; transition: all 0.1s; }
+.ed-btn:hover { border-color: var(--crt-green); color: var(--crt-green); }
+#level-select { font-family: 'Press Start 2P', monospace; font-size: 7px; background: var(--bg-panel); color: var(--crt-amber); border: 1px solid var(--border-glow); padding: 4px 8px; margin-bottom: 12px; width: 100%; }
+#level-select option { background: var(--bg-panel); }
+.ed-coords { font-size: 7px; color: #333; padding: 4px 0; }
+/* ─ Custom Character System ─────────────────────────── */
+#char-section { margin-top:14px; border-top:1px solid var(--border-glow); padding-top:10px; }
+#char-section h3 { font-size:8px; color:#555; margin-bottom:8px; letter-spacing:2px; }
+#char-list { display:flex; flex-direction:column; gap:4px; margin-bottom:8px; max-height:130px; overflow-y:auto; }
+.char-entry { display:flex; align-items:center; gap:5px; padding:4px 6px; border:1px solid #222; cursor:pointer; transition:border-color .1s; }
+.char-entry:hover { border-color:#555; }
+.char-entry.active { border-color:var(--crt-green); }
+.char-swatch { width:14px; height:14px; flex-shrink:0; border:1px solid #444; image-rendering:pixelated; }
+.char-label { font-size:6px; color:#aaa; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.char-del { font-size:9px; color:#553; cursor:pointer; padding:0 3px; line-height:1; }
+.char-del:hover { color:var(--crt-red); }
+/* Modal */
+#char-modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:10000; align-items:center; justify-content:center; }
+#char-modal-bg.open { display:flex; }
+#char-modal { background:var(--bg-panel); border:2px solid var(--crt-amber); padding:20px; min-width:300px; max-width:380px; width:90%; font-family:'Press Start 2P',monospace; }
+#char-modal h2 { font-size:10px; color:var(--crt-amber); margin-bottom:16px; }
+.cf { margin-bottom:10px; }
+.cf label { display:block; font-size:6px; color:#555; margin-bottom:4px; letter-spacing:1px; }
+.cf input, .cf select { font-family:inherit; font-size:7px; background:#0a0a0f; color:var(--crt-green); border:1px solid #333; padding:5px 8px; width:100%; box-sizing:border-box; }
+.cf input[type=color] { padding:2px; height:28px; cursor:pointer; }
+.cf input[type=range] { padding:0; height:18px; accent-color:var(--crt-green); }
+.cf .rv { color:var(--crt-amber); margin-left:6px; }
+.char-prev-row { display:flex; align-items:center; gap:14px; margin-bottom:12px; }
+#char-prev-cnv { border:1px solid #333; image-rendering:pixelated; }
+#char-prev-info { font-size:6px; color:#555; line-height:2.2; }
+.char-modal-btns { display:flex; gap:8px; justify-content:flex-end; }
+  </style>
+</head>
+<body>
+
+  <!-- MENU -->
+  <div id="screen-menu" class="active">
+    <div class="menu-title">DANGEROUS GAME</div>
+    <div class="menu-sub">▒ Build Your Own Game ▒</div>
+    <canvas id="menu-canvas" width="400" height="100" style="image-rendering:pixelated;margin-bottom:30px;"></canvas>
+    <div class="menu-options">
+      <button class="btn btn-amber" id="btn-play">▶ START GAME</button>
+      <button class="btn" id="btn-editor">✎ LEVEL EDITOR</button>
+    </div>
+    <div class="menu-hi" id="menu-hi">HI-SCORE: <span>0000000</span></div>
+    <div style="margin-top:40px;font-size:7px;color:#333;text-align:center;line-height:2.2;">
+      ARROW KEYS = MOVE &nbsp;|&nbsp; SPACE / ↑ = JUMP<br>
+      CTRL / Z = SHOOT &nbsp;|&nbsp; ESC = MENU<br>
+      COLLECT ALL TROPHIES → GET KEY → REACH DOOR
+    </div>
+  </div>
+
+  <!-- GAME -->
+  <div id="screen-game">
+    <div id="hud">
+      <div class="hud-group">
+        <div class="hud-item"><label>SCORE</label><span id="hud-score">0000000</span></div>
+        <div class="hud-item"><label>HI</label><span id="hud-hi">0000000</span></div>
+        <div class="hud-item"><label>LEVEL</label><span id="hud-level">LEVEL 1</span></div>
+      </div>
+      <div class="hud-group">
+        <div class="hud-item"><label>LIVES</label><span class="hud-lives" id="hud-lives">♥♥♥</span></div>
+        <div class="hud-item"><label>CUPS</label><span id="hud-trophy">0</span></div>
+        <div class="hud-item"><label>KEY</label><span id="hud-key">NO</span></div>
+        <div class="hud-item"><label>GUN</label><span id="hud-gun">NO</span></div>
+      </div>
+    </div>
+    <div id="canvas-wrapper">
+      <canvas id="gameCanvas"></canvas>
+      <div id="msg-overlay"></div>
+    </div>
+    <div id="controls-hint">
+      <span>← → MOVE &nbsp; SPACE/↑ JUMP &nbsp; CTRL/Z SHOOT</span>
+      <button class="btn btn-danger" id="btn-menu" style="font-size:7px;padding:4px 10px;">ESC / QUIT</button>
+    </div>
+  </div>
+
+  <!-- GAME OVER -->
+  <div id="screen-gameover">
+    <div class="gameover-title">GAME OVER</div>
+    <div class="gameover-score">SCORE: <span id="go-score">0000000</span></div>
+    <div class="gameover-hi">HI-SCORE: <span id="go-hi">0000000</span></div>
+    <div class="menu-options">
+      <button class="btn btn-amber" id="btn-retry">▶ PLAY AGAIN</button>
+      <button class="btn" id="btn-gomenu">← MAIN MENU</button>
+    </div>
+  </div>
+
+  <!-- EDITOR -->
+  <div id="screen-editor">
+    <div id="editor-header">
+      <h2>◈ LEVEL EDITOR</h2>
+      <div style="display:flex;gap:8px;">
+        <button class="ed-btn" id="btn-ed-play">▶ PLAY TEST</button>
+        <button class="ed-btn" id="btn-ed-export">↓ EXPORT JSON</button>
+        <button class="ed-btn" id="btn-ed-import">↑ IMPORT JSON</button>
+        <button class="ed-btn btn-danger" id="btn-ed-menu">✕ BACK</button>
+        <input type="file" id="ed-import-input" accept=".json" style="display:none">
+      </div>
+    </div>
+    <div id="editor-layout">
+      <div id="editor-sidebar">
+        <div class="tile-label">LEFT CLICK = PAINT<br>RIGHT CLICK = ERASE</div>
+        <h3>LEVEL</h3>
+        <select id="ed-level-select"></select>
+        <h3>TILES</h3>
+        <div style="margin-top:16px;font-size:6px;color:#333;line-height:2;">
+          TILE GUIDE:<br>0=EMPTY 1=GROUND<br>2=BRICK 3=SPIKE<br>4=TROPHY 5=KEY<br>6=DOOR 7=GUN<br>8=LAVA 11=ENEMY<br>12=PLAYER SPAWN<br>14=JETPACK 15=LIFE
+        </div>
+        <div class="tile-palette" id="tile-palette"></div>
+        <div id="editor-tools">
+          <button class="ed-btn" id="btn-ed-clear">CLEAR</button>
+          <button class="ed-btn" id="btn-ed-fill">FILL FLOOR</button>
+        </div>
+
+        <div id="char-section">
+          <h3>CHARACTERS</h3>
+          <div id="char-list"></div>
+          <button class="ed-btn" id="btn-add-char" style="width:100%;border-color:var(--crt-amber);color:var(--crt-amber);">+ ADD CHARACTER</button>
+        </div>
+
+        <div class="ed-coords" id="ed-coords">Hover to inspect</div>
+      </div>
+
+  <!-- CHARACTER MODAL -->
+  <div id="char-modal-bg">
+    <div id="char-modal">
+      <h2 id="char-modal-title">&#9632; NEW CHARACTER</h2>
+      <div class="cf"><label>NAME</label>
+        <input type="text" id="char-name" maxlength="12" placeholder="e.g. ROBOT" value="CUSTOM"></div>
+      <div style="display:flex;gap:10px">
+        <div class="cf" style="flex:1"><label>BODY COLOR</label>
+          <input type="color" id="char-color" value="#cc4444"></div>
+        <div class="cf" style="flex:1"><label>EYE COLOR</label>
+          <input type="color" id="char-eyecolor" value="#ff0000"></div>
+      </div>
+      <div class="cf"><label>BEHAVIOR</label>
+        <select id="char-behavior">
+          <option value="patrol">PATROL  (walks back &amp; forth)</option>
+          <option value="fast">FAST    (quick walker)</option>
+          <option value="flying">FLYING  (hovers, no gravity)</option>
+          <option value="jumper">JUMPER  (bounces on platforms)</option>
+        </select></div>
+      <div class="cf"><label>SPEED &nbsp;<span class="rv" id="rv-speed">1.4</span></label>
+        <input type="range" id="char-speed" min="0.5" max="4" step="0.1" value="1.4"></div>
+      <div class="cf"><label>PATROL RANGE &nbsp;<span class="rv" id="rv-range">80</span>px</label>
+        <input type="range" id="char-range" min="32" max="300" step="8" value="80"></div>
+      <div class="cf"><label>SCORE VALUE &nbsp;<span class="rv" id="rv-score">300</span>pts</label>
+        <input type="range" id="char-score" min="100" max="1000" step="50" value="300"></div>
+      <div class="char-prev-row">
+        <canvas id="char-prev-cnv" width="48" height="56" style="width:48px;height:56px;"></canvas>
+        <div id="char-prev-info"></div>
+      </div>
+      <div class="char-modal-btns">
+        <button class="ed-btn" id="char-cancel">CANCEL</button>
+        <button class="ed-btn" id="char-save" style="border-color:var(--crt-amber);color:var(--crt-amber);">SAVE CHARACTER</button>
+      </div>
+    </div>
+  </div>
+      <div id="editor-canvas-wrap">
+        <canvas id="editorCanvas"></canvas>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// LEVELS DATA
+// ═══════════════════════════════════════════════════════
+const TILE = { EMPTY:0,SOLID:1,BRICK:2,SPIKE:3,TROPHY:4,KEY:5,DOOR:6,GUN:7,HAZARD:8,LADDER:9,PLATFORM:10,ENEMY:11,SPAWN:12,WARP:13,JETPACK:14,LIFE:15 };
+
+
+const LEVELS = [
+  { 
+    name: "LEVEL 1: CANDY CANYON 🍬", width: 50, height: 10, bgColor: "#1a0a2e", tiles: [
+      [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [ 1,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [ 1,0,0,0,0,0,5,0,0,0,5,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [ 1,0,0,2,2,0,0,0,0,1,1,1,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [ 1,0,2,0,0,0,2,0,0,0,2,0,0,0,2,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [ 1,0,0,0,2,0,0,0,2,0,0,0,2,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [ 1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [ 1,12,0,0,0,0,2,0,4,1,6,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [ 1,1,1,1,1,7,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [ 1,1,1,1,1,1,8,8,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ]
+  },
+  { 
+    name: "LEVEL 2: DINO DASH 🦖", width: 55, height: 10, bgColor: "#0a1a0a", tiles: [
+      [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [ 1,5,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,1,0,0,0,0,1],
+      [ 1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1],
+      [ 1,0,0,0,0,0,0,0,1,1,1,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [ 1,0,1,1,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1,1,1,1,1,1,1,1,1,0,0,1,15,15,15,0,15,0,0,15,0,15,0,0,0,0,0,0,0,1],
+      [ 1,0,0,0,0,0,0,0,0,1,0,1,0,4,1,0,1,1,1,1,0,1,0,0,1,0,0,5,1,0,0,0,0,1,0,0,1,0,15,0,0,15,15,0,15,0,15,0,15,0,0,0,0,0,1],
+      [ 1,0,0,1,1,1,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,0,1,0,0,0,0,1,0,0,1,0,1,0,1,1,15,0,0,0,15,0,15,15,0,15,15,0,0,0,0,0,0,1],
+      [ 1,12,0,0,0,0,0,0,5,1,0,0,0,1,1,0,5,5,5,5,0,1,0,1,0,1,1,0,1,0,1,1,0,0,0,0,1,15,15,15,0,15,0,0,15,0,15,0,15,0,0,0,0,0,1],
+      [ 1,1,1,3,3,3,3,3,3,1,5,3,3,3,1,3,3,3,3,3,3,1,0,0,0,1,5,0,0,0,0,1,0,0,1,0,1,8,8,8,8,8,8,8,8,8,8,8,8,8,3,3,3,3,1],
+      [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ]
+  },
+  { 
+    name: "LEVEL 3: FIRE DRAGON’S DEN 🐉", width: 60, height: 10, bgColor: "#1a0a0a", tiles: [
+      [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [ 1,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,1],
+      [ 1,0,0,0,0,0,0,0,0,5,7,0,0,0,0,0,0,5,0,0,20,0,0,0,0,0,0,0,0,5,0,0,20,0,0,0,0,0,0,0,6,0,0,5,0,0,0,0,0,0,0,5,5,5,1],
+      [ 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [ 1,3,12,0,0,3,0,0,3,3,0,0,3,0,0,3,3,0,0,3,0,0,11,3,0,0,0,3,0,0,3,11,3,0,23,0,0,0,0,0,0,0,0,5,0,3,3,8,8,8,8,8,3,3,1],
+      [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,0,0,0,0,0,0,3,3,1,1,1,1,1,1,1,1,1,1],
+      [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,0,0,0,0,3,3,1,1,1,1,1,1,1,1,1,1,1],
+      [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,15,14,3,3,1,1,1,1,1,1,1,1,1,1,1,1]
+    ]
+  },
+  { 
+    name: "LEVEL 4: GALAXY GUARDIAN 🛸", width: 65, height: 10, bgColor: "#0a0a1a", tiles: [
+      [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ],
+      [ 1,0,0,0,0,4,0,1,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,1,0,0,5,0,0,0,0,0,0,0,0,6,1 ],
+      [ 1,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,5,0,0,0,1,1,1,1,1,1,0,0,1,0,0,3,1,1,1,1,5,0,0,0,0,1 ],
+      [ 1,1,0,0,0,0,0,0,0,1,1,1,0,1,1,1,0,0,0,0,0,0,1,0,0,0,1,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1 ],
+      [ 1,0,1,0,0,0,0,1,1,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,1,1,1,1,0,0,1,1,1,1,0,1,1,1,0,0,1,0,1 ],
+      [ 1,12,1,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,1,0,0,0,11,0,0,1,0,1,0,0,0,0,5,0,0,0,1,0,0,0,14,1,0,0,0,5,1,0,1 ],
+      [ 1,0,0,1,1,1,0,0,0,0,0,1,0,0,0,1,0,0,1,0,0,0,0,1,1,0,0,1,1,1,0,1,0,1,0,0,0,0,0,0,0,0,1,0,1,1,1,1,0,1,1,1,1,0,1 ],
+      [ 1,0,0,0,0,0,0,0,0,1,1,1,1,0,0,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,1,0,1,1,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 ],
+      [ 1,0,0,0,0,0,0,0,1,1,1,1,1,1,0,1,0,0,0,0,0,1,1,1,1,1,1,3,3,3,3,1,5,0,0,0,0,0,0,1,3,0,0,0,0,0,0,0,0,0,0,0,0,3,1 ],
+      [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ]
+    ]
+  },
+  { 
+    name: "LEVEL 5: JUNGLE JIVE 🐒", width: 70, height: 10, bgColor: "#1a1a00", tiles: [
+      [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ],
+      [ 1,5,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,6,0,0,0,14,1,0,0,0,0,0,0,0,0,0,0,0,6,2,0,0,0,0,1 ],
+      [ 1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,2,2,2,2,0,2,2,0,0,0,0,5,1,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,1 ],
+      [ 1,0,0,0,0,0,0,0,2,2,2,0,0,2,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,3,3,0,0,0,0,0,1,0,0,15,0,0,0,15,0,0,0,15,15,0,0,15,0,0,1 ],
+      [ 1,0,2,2,0,0,2,0,0,2,0,0,0,0,2,0,0,0,0,0,0,0,2,0,0,2,2,2,2,2,2,2,2,2,0,0,1,0,0,15,15,15,0,0,15,15,0,0,0,15,0,0,0,0,1 ],
+      [ 1,0,0,0,0,0,0,0,0,2,0,2,0,4,2,0,2,2,2,2,0,2,0,0,2,0,0,5,2,0,0,0,0,2,0,0,1,15,0,15,15,0,15,0,15,0,15,0,15,0,0,15,0,0,1 ],
+      [ 1,0,0,2,2,2,0,0,0,2,0,0,0,0,2,0,0,15,15,0,0,2,0,0,0,0,0,0,2,0,0,2,0,2,0,2,1,0,15,0,15,15,15,15,15,0,15,15,15,15,15,15,15,0,1 ],
+      [ 1,12,0,0,0,0,0,0,5,2,0,0,0,2,2,0,5,3,3,5,0,2,0,0,7,2,2,0,2,0,2,2,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 ],
+      [ 1,1,1,3,3,3,3,3,3,2,5,3,3,3,2,3,3,15,15,3,3,2,2,2,0,2,5,0,0,0,0,2,0,0,2,5,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1 ],
+      [ 1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,3,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ]
+    ]
+  },
+  { 
+    name: "LEVEL 6: ROBOT RUN 🤖", width: 70, height: 10, bgColor: "#0a1a1a", tiles: [
+      [ 4,0,0,3,0,0,0,0,0,22,0,0,0,0,0,2,0,0,4,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ],
+      [ 0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,2,0,2,2,2,2,2,2,2,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ],
+      [ 0,2,0,1,2,2,2,2,2,1,0,0,1,4,0,2,0,0,0,0,0,0,0,0,0,0,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ],
+      [ 0,0,0,1,4,0,0,0,5,1,3,0,1,0,0,2,4,4,4,0,22,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ],
+      [ 0,0,2,1,0,0,0,0,0,1,0,0,1,2,0,2,4,5,4,0,0,0,0,0,2,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ],
+      [ 0,0,0,1,0,0,0,0,23,1,0,0,1,7,0,2,8,4,4,0,0,0,0,0,0,0,21,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ],
+      [ 2,0,0,1,0,2,2,2,2,1,0,0,1,0,0,2,2,2,2,2,2,0,0,2,2,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ],
+      [ 0,0,0,1,0,0,0,20,0,0,0,7,1,0,2,0,0,0,14,4,0,2,0,0,0,0,4,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ],
+      [ 0,0,2,1,2,0,2,2,2,2,2,2,1,0,0,0,0,0,0,0,0,0,2,2,2,2,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ],
+      [ 12,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,20,0,3,3,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ]
+    ]
+  },
+  { 
+    name: "LEVEL 7: NEON NIGHTS ✨", width: 75, height: 10, bgColor: "#1a0a1a", tiles: [
+      [ 2,5,0,0,0,0,0,0,0,7,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,7,5,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2 ],
+      [ 2,0,2,2,2,2,2,2,2,2,2,0,0,0,21,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,2,3,2,2,2,2,2,2,2,2,2,0,2,2,2,2,2,2,2,2,2,2,2,2,2 ],
+      [ 2,22,0,0,0,0,0,0,0,5,2,2,2,2,2,2,2,3,2,2,2,2,2,2,2,2,2,2,0,0,2,2,2,2,2,2,2,2,2,2,2,15,2,2,2,2,2,2,2,2,2,2,2,2,2 ],
+      [ 2,2,2,2,2,2,2,2,2,0,0,0,0,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2 ],
+      [ 2,2,0,0,0,0,0,5,2,2,0,0,0,0,0,0,0,2,4,22,0,0,0,0,0,0,0,0,0,5,0,0,0,0,22,0,0,0,0,0,6,0,0,5,0,0,0,0,0,0,0,5,5,5,2 ],
+      [ 2,2,0,0,0,0,0,0,2,2,2,2,0,0,0,2,0,2,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,14,0,0,0,0,0,0,0,0,0,0,2 ],
+      [ 2,2,12,0,0,3,0,23,2,22,22,2,0,0,0,0,0,2,0,23,0,0,0,0,0,2,2,2,0,0,3,11,3,0,0,0,0,2,0,0,2,0,0,5,0,0,3,8,8,8,8,8,3,3,2 ],
+      [ 2,2,2,2,0,2,2,2,2,2,2,2,2,0,2,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,0,0,0,0,0,0,0,0,3,2,2,2,2,2,2,2,2,2,2 ],
+      [ 2,7,2,2,0,0,0,0,0,0,0,0,0,0,2,3,5,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,0,0,0,0,0,0,3,2,2,2,2,2,2,2,2,2,2,2 ],
+      [ 2,0,0,0,0,0,0,0,0,11,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,15,14,3,3,2,2,2,2,2,2,2,2,2,2,2,2 ]
+    ]
+  },
+  { 
+    name: "LEVEL 8: ICE ISLAND ❄️", width: 80, height: 10, bgColor: "#001010", tiles: [
+      [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ],
+      [ 1,0,0,0,0,4,0,1,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,1,0,0,5,0,0,0,0,0,0,0,0,6,1 ],
+      [ 1,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,20,0,5,0,0,0,1,1,1,1,1,1,0,0,1,0,0,3,1,1,1,1,5,0,0,0,0,1 ],
+      [ 1,1,0,0,0,0,0,0,0,1,1,1,0,1,1,1,0,0,0,0,0,0,1,0,0,0,1,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,20,0,0,0,0,0,0,1,0,1 ],
+      [ 1,0,1,0,0,0,0,1,1,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,1,1,1,1,0,0,1,1,1,1,0,1,1,1,0,0,1,0,1 ],
+      [ 1,12,1,8,8,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,1,0,0,0,20,0,0,1,0,1,0,0,0,0,5,0,0,0,1,0,0,8,14,1,0,0,0,5,1,0,1 ],
+      [ 1,0,0,1,1,1,0,0,0,0,0,1,0,0,0,1,0,0,1,0,0,0,0,1,1,0,0,1,1,1,0,1,0,1,0,0,0,0,0,0,0,0,1,0,1,1,1,1,0,1,1,1,1,0,1 ],
+      [ 1,0,0,0,0,0,0,0,0,1,1,1,1,0,0,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,1,0,1,1,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 ],
+      [ 1,0,0,0,0,0,0,0,1,1,1,1,1,1,0,1,0,0,0,0,0,1,1,1,1,1,1,3,3,3,3,1,5,0,22,0,0,0,0,1,3,0,0,21,0,0,0,0,0,0,0,0,0,3,1 ],
+      [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ]
+    ]
+  },
+  { 
+    name: "LEVEL 9: MAGICAL MAZE 🎩", width: 80, height: 10, bgColor: "#100010", tiles: [
+      [ 4,0,0,7,0,0,0,0,0,0,0,0,0,0,0,2,0,0,4,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ],
+      [ 0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,2,0,2,2,2,2,2,2,2,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ],
+      [ 0,2,0,1,2,2,2,2,2,1,0,0,1,4,0,2,0,0,0,0,0,0,0,0,0,0,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ],
+      [ 0,0,0,1,4,0,0,0,5,1,3,0,1,0,0,2,4,4,4,0,22,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ],
+      [ 0,0,2,1,0,0,0,0,0,1,0,0,1,2,0,2,4,5,4,0,0,0,0,0,2,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ],
+      [ 0,0,0,1,0,2,0,0,23,1,0,0,1,7,0,2,8,4,4,0,0,0,0,0,0,0,21,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ],
+      [ 2,0,0,1,0,2,2,2,2,1,0,0,1,0,0,2,2,2,2,2,2,0,0,2,2,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ],
+      [ 0,0,0,1,0,0,0,20,0,0,0,7,1,0,2,0,0,0,14,4,0,2,0,0,0,0,4,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ],
+      [ 0,0,2,1,2,0,2,2,2,2,2,2,1,0,0,0,0,0,0,0,0,0,2,2,2,2,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ],
+      [ 12,0,0,1,7,0,0,0,0,0,0,0,0,0,0,0,20,0,3,3,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ]
+    ]
+  },
+  { 
+    name: "FINAL LEVEL: STARSHIP SHOWDOWN! ⭐", width: 90, height: 10, bgColor: "#0f0007", tiles: [
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,0,4,4,0,4,4,0,4,4,0,4,4,0,0,4,4,0,0,4,0,0,4,0,0,0,4,0,0,0,4,4,0,0,0,4,0,0,0,0,4,4,0,0,0,4,0,0,0,0,4,0,0,0,0,0,4,4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,1,1,1,1,1,1,0,1,1,1,1,1,0,0,1,1,1,0,1,1,0,1,1,0,1,1,1,0,0,1,1,1,0,1,1,1,0,0,1,1,1,0,0,1,1,1,0,0,0,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,0,11,0,0,11,0,0,0,11,0,0,0,11,0,0,0,0,11,0,0,0,0,11,0,0,0,11,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,11,0,0,0,0,0,0,0,7,14,0,0,5,0,0,6,0,0,0,0,0,0,15,0,0,0,0,0,0,0,0,1],
+      [1,0,1,1,1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,0,1,1,1,0,1,1,1,0,0,1,1,1,0,0,1,1,1,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ]
+  },
+  { name:"LEVEL 11: THE CLIMB 🧗",width:50,height:10,bgColor:"#0f172a",tiles:[
+    [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ],
+    [ 1,4,0,0,0,0,0,0,1,5,5,5,1,0,0,0,0,0,0,1,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 ],
+    [ 1,1,1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 ],
+    [ 1,0,0,0,0,1,1,1,1,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 ],
+    [ 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,5,5,5,0,0,1 ],
+    [ 1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,1 ],
+    [ 1,0,0,0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0,11,0,0,0,0,11,0,0,0,0,11,0,0,0,0,0,0,0,0,1 ],
+    [ 1,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,0,0,4,1 ],
+    [ 1,1,1,3,3,3,1,1,1,1,1,3,3,3,1,1,1,1,1,3,3,3,1,1,1,1,1,3,3,3,1,1,1,3,3,3,1,1,1,3,3,3,1,1,1,1,1,1,1,1 ],
+    [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ]
+  ]},
+  { name:"LEVEL 12: JETPACK JOY 🚀",width:60,height:10,bgColor:"#1e1b4b",tiles:[
+    [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ],
+    [ 1,14,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,0,5,0,0,3,0,0,5,0,0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,0,4,0,0,0,0,0,0,0,0,6,1,1 ],
+    [ 1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,1,1,1 ],
+    [ 1,0,0,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,0,3,0,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 ],
+    [ 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 ],
+    [ 1,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 ],
+    [ 1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,1,1,1,1,1 ],
+    [ 1,1,1,1,3,3,3,3,1,1,1,1,3,3,3,3,1,1,1,1,3,3,3,3,1,1,1,1,3,3,3,3,1,1,1,1,3,3,3,3,1,1,1,1,3,3,3,3,1,1,1,1,3,3,3,1,1,1,1,1 ],
+    [ 1,1,1,1,8,8,8,8,1,1,1,1,8,8,8,8,1,1,1,1,8,8,8,8,1,1,1,1,8,8,8,8,1,1,1,1,8,8,8,8,1,1,1,1,8,8,8,8,1,1,1,1,8,8,8,1,1,1,1,1 ],
+    [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ]
+  ]},
+  { name:"LEVEL 13: GAUNTLET ⚔️",width:70,height:10,bgColor:"#312e81",tiles:[
+    [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ],
+    [ 1,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,1 ],
+    [ 1,1,1,1,0,11,0,11,0,11,0,1,1,1,1,0,11,0,11,0,11,0,1,1,1,1,0,11,0,11,0,11,0,1,1,1,1,0,11,0,11,0,11,0,1,1,1,1,0,11,0,11,0,11,0,1,1,1,1,0,0,0,0,0,0,0,0,1 ],
+    [ 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 ],
+    [ 1,0,0,0,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,5,5,5,0,0,0,0,0,0,0,0,0,0,1 ],
+    [ 1,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1 ],
+    [ 1,1,1,0,11,0,11,0,11,0,11,0,1,1,1,0,11,0,11,0,11,0,11,0,1,1,1,0,11,0,11,0,11,0,11,0,1,1,1,0,11,0,11,0,11,0,11,0,1,1,1,0,11,0,11,0,11,0,11,0,0,0,0,0,0,4,1 ],
+    [ 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1 ],
+    [ 1,1,1,3,3,3,3,3,3,3,3,3,3,1,1,3,3,3,3,3,3,3,3,3,1,1,3,3,3,3,3,3,3,3,3,1,1,3,3,3,3,3,3,3,3,3,1,1,3,3,3,3,3,3,3,3,3,1,1,1,1,8,8,8,1,1,1,1,1,1 ],
+    [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ]
+  ]},
+  { name:"LEVEL 14: LAVA LEAP 🌋",width:75,height:10,bgColor:"#450a0a",tiles:[
+    [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ],
+    [ 1,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,1 ],
+    [ 1,1,1,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1 ],
+    [ 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 ],
+    [ 1,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,0,0,0,0,0,0,0,0,1 ],
+    [ 1,0,0,0,1,1,1,1,1,0,0,1,1,1,1,1,0,0,1,1,1,1,1,0,0,1,1,1,1,1,0,0,1,1,1,1,1,0,0,1,1,1,1,1,0,0,1,1,1,1,1,0,0,1,1,1,1,1,0,0,1,1,1,1,1,0,0,1,1,1,1,0,0,0,1 ],
+    [ 1,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,1 ],
+    [ 1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1 ],
+    [ 1,1,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,1,1 ],
+    [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ]
+  ]},
+  { name:"LEVEL 15: THE SNIPER 🎯",width:80,height:10,bgColor:"#064e3b",tiles:[
+    [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ],
+    [ 1,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 ],
+    [ 1,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 ],
+    [ 1,1,1,1,1,0,0,0,0,11,0,0,0,0,11,0,0,0,0,11,0,0,0,0,11,0,0,0,0,11,0,0,0,0,11,0,0,0,0,11,0,0,0,0,11,0,0,0,0,11,0,0,0,0,11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 ],
+    [ 1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ],
+    [ 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,1 ],
+    [ 1,0,0,0,0,1,1,1,0,0,1,1,1,0,0,1,1,1,0,0,1,1,1,0,0,1,1,1,0,0,1,1,1,0,0,1,1,1,0,0,1,1,1,0,0,1,1,1,0,0,1,1,1,0,0,1,1,1,0,0,1,1,1,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,1,1 ],
+    [ 1,5,0,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,0,0,6,1 ],
+    [ 1,1,1,1,1,1,1,1,1,3,1,1,1,1,1,3,1,1,1,1,1,3,1,1,1,1,1,3,1,1,1,1,1,3,1,1,1,1,1,3,1,1,1,1,1,3,1,1,1,1,1,3,1,1,1,1,1,3,1,1,1,1,1,3,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1 ],
+    [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ]
+  ]},
+  { name:"LEVEL 16: UNDERPASS 🚇",width:85,height:10,bgColor:"#1e293b",tiles:[
+    [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ],
+    [ 1,12,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,5,5,5,0,0,0,6,1 ],
+    [ 1,1,1,1,1,0,1,0,1,1,0,1,0,1,1,0,1,0,1,1,0,1,0,1,1,0,1,0,1,1,0,1,0,1,1,0,1,0,1,1,0,1,0,1,1,0,1,0,1,1,0,1,0,1,1,0,1,0,1,1,0,1,0,1,1,0,1,0,1,1,0,1,0,1,1,0,1,1,1,1,1,1,1,1,1 ],
+    [ 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 ],
+    [ 1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1 ],
+    [ 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,1 ],
+    [ 1,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,1 ],
+    [ 1,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,1 ],
+    [ 1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1 ],
+    [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ]
+  ]},
+  { name:"LEVEL 17: GRIDLOCK 🧱",width:90,height:10,bgColor:"#3f2b1c",tiles:[
+    [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ],
+    [ 1,12,0,0,0,2,5,5,5,2,0,0,0,2,0,0,0,2,5,5,5,2,0,0,0,2,0,0,0,2,5,5,5,2,0,0,0,2,0,0,0,2,5,5,5,2,0,0,0,2,0,0,0,2,5,5,5,2,0,0,0,2,0,0,0,2,5,5,5,2,0,0,0,2,0,0,0,2,5,5,5,2,0,0,0,2,4,0,6,1 ],
+    [ 1,0,0,0,0,2,0,0,0,2,0,0,0,2,0,0,0,2,0,0,0,2,0,0,0,2,0,0,0,2,0,0,0,2,0,0,0,2,0,0,0,2,0,0,0,2,0,0,0,2,0,0,0,2,0,0,0,2,0,0,0,2,0,0,0,2,0,0,0,2,0,0,0,2,0,0,0,2,0,0,0,2,0,0,0,2,0,0,0,1 ],
+    [ 1,1,1,1,0,2,0,11,0,2,0,1,1,2,0,11,0,2,0,11,0,2,0,1,1,2,0,11,0,2,0,11,0,2,0,1,1,2,0,11,0,2,0,11,0,2,0,1,1,2,0,11,0,2,0,11,0,2,0,1,1,2,0,11,0,2,0,11,0,2,0,1,1,2,0,11,0,2,0,11,0,2,0,1,1,1,1,1 ],
+    [ 1,0,0,0,0,2,2,3,2,2,0,0,0,2,2,3,2,2,0,0,0,2,2,3,2,2,0,0,0,2,2,3,2,2,0,0,0,2,2,3,2,2,0,0,0,2,2,3,2,2,0,0,0,2,2,3,2,2,0,0,0,2,2,3,2,2,0,0,0,2,2,3,2,2,0,0,0,2,2,3,2,2,0,0,0,0,0,0,0,1 ],
+    [ 1,0,1,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1 ],
+    [ 1,0,0,0,0,3,3,3,3,3,0,0,0,0,3,3,3,3,3,0,0,0,0,3,3,3,3,3,0,0,0,0,3,3,3,3,3,0,0,0,0,3,3,3,3,3,0,0,0,0,3,3,3,3,3,0,0,0,0,3,3,3,3,3,0,0,0,0,3,3,3,3,3,0,0,0,0,3,3,3,3,3,0,0,0,0,0,0,0,1 ],
+    [ 1,0,0,0,0,8,8,8,8,8,0,0,0,0,8,8,8,8,8,0,0,0,0,8,8,8,8,8,0,0,0,0,8,8,8,8,8,0,0,0,0,8,8,8,8,8,0,0,0,0,8,8,8,8,8,0,0,0,0,8,8,8,8,8,0,0,0,0,8,8,8,8,8,0,0,0,0,8,8,8,8,8,0,0,0,0,0,0,0,1 ],
+    [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ],
+    [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ]
+  ]},
+  { name:"LEVEL 18: SKY BRIDGE ☁️",width:90,height:10,bgColor:"#075985",tiles:[
+    [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ],
+    [ 1,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,1 ],
+    [ 1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1 ],
+    [ 1,0,0,0,0,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1 ],
+    [ 1,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,1 ],
+    [ 1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1 ],
+    [ 1,1,1,1,1,3,3,3,3,1,1,3,3,3,3,1,1,3,3,3,3,1,1,3,3,3,3,1,1,3,3,3,3,1,1,3,3,3,3,1,1,3,3,3,3,1,1,3,3,3,3,1,1,3,3,3,3,1,1,3,3,3,3,1,1,3,3,3,3,1,1,3,3,3,3,1,1,3,3,3,3,1,1,1,1,1,1,1,1,1 ],
+    [ 1,1,1,1,1,8,8,8,8,1,1,8,8,8,8,1,1,8,8,8,8,1,1,8,8,8,8,1,1,8,8,8,8,1,1,8,8,8,8,1,1,8,8,8,8,1,1,8,8,8,8,1,1,8,8,8,8,1,1,8,8,8,8,1,1,8,8,8,8,1,1,8,8,8,8,1,1,8,8,8,8,1,1,1,1,1,1,1,1,1 ],
+    [ 1,1,1,1,1,8,8,8,8,1,1,8,8,8,8,1,1,8,8,8,8,1,1,8,8,8,8,1,1,8,8,8,8,1,1,8,8,8,8,1,1,8,8,8,8,1,1,8,8,8,8,1,1,8,8,8,8,1,1,8,8,8,8,1,1,8,8,8,8,1,1,8,8,8,8,1,1,8,8,8,8,1,1,1,1,1,1,1,1,1 ],
+    [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ]
+  ]},
+  { name:"LEVEL 19: SPIKE RUN 🏃‍♂️",width:95,height:10,bgColor:"#111827",tiles:[
+    [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ],
+    [ 1,12,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,6,1 ],
+    [ 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 ],
+    [ 1,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,0,11,1 ],
+    [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ],
+    [ 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,1 ],
+    [ 1,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,1 ],
+    [ 1,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,1 ],
+    [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ],
+    [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ]
+  ]},
+  { name:"LEVEL 20: ZENITH 👑",width:100,height:10,bgColor:"#020617",tiles:[
+    [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ],
+    [ 1,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 ],
+    [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,4,1 ],
+    [ 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1 ],
+    [ 1,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,11,0,0,0,0,0,1 ],
+    [ 1,12,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,1 ],
+    [ 1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 ],
+    [ 1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,5,5,5,1 ],
+    [ 1,1,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,6,1 ],
+    [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ]
+  ]}
+];
+
+// ═══════════════════════════════════════════════════════
+// GAME ENGINE
+// ═══════════════════════════════════════════════════════
+const TILE_SIZE = 32;
+const CANVAS_W  = 760;
+const CANVAS_H  = 320;
+const COLS_VIS  = Math.ceil(CANVAS_W / TILE_SIZE);
+const ROWS_VIS  = Math.ceil(CANVAS_H / TILE_SIZE);
+
+const TF = {
+  isSolid:   t => t === 1 || t === 2,
+  isKill:    t => t === 3 || t === 8,
+  isTrophy:  t => t === 4,
+  isKey:     t => t === 5,
+  isDoor:    t => t === 6,
+  isGun:     t => t === 7,
+  isJetpack: t => t === 14,
+  isLife:    t => t === 15,
+};
+
+let audioCtx = null;
+function getAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
+function playTone(freq, duration, type='square', vol=0.15) {
+  try {
+    const ctx = getAudio();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = type; osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + duration);
+  } catch(e) {}
+}
+function sfxJump()    { playTone(300,0.12,'square',0.1); setTimeout(()=>playTone(500,0.08,'square',0.08),60); }
+function sfxShoot()   { playTone(800,0.05,'sawtooth',0.08); }
+function sfxCollect() { playTone(600,0.06); setTimeout(()=>playTone(900,0.06),60); setTimeout(()=>playTone(1200,0.1),120); }
+function sfxDoor()    { [400,500,600,800].forEach((f,i)=>setTimeout(()=>playTone(f,0.15),i*80)); }
+function sfxDie()     { [300,250,200,150,100].forEach((f,i)=>setTimeout(()=>playTone(f,0.12,'sawtooth',0.15),i*60)); }
+function sfxLevelUp() { [400,500,600,700,900,1100].forEach((f,i)=>setTimeout(()=>playTone(f,0.18),i*70)); }
+
+const SPRITES = {};
+(function buildSprites() {
+  function makeCanvas(w, h) { const c = document.createElement('canvas'); c.width=w; c.height=h; return c; }
+  function px(ctx, x, y, color) { ctx.fillStyle=color; ctx.fillRect(x,y,1,1); }
+
+  function drawJanzi(ctx, frame, dir) {
+    ctx.clearRect(0,0,12,16);
+    if (dir===-1) { ctx.save(); ctx.scale(-1,1); ctx.translate(-12,0); }
+    const b='#4488ff', s='#ffcc44', k='#222', fl='#ff6644';
+    [[3,0],[4,0],[5,0],[6,0],[7,0],[8,0],[2,1],[3,1],[4,1],[5,1],[6,1],[7,1],[8,1],[9,1],[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],[8,2],[9,2],[2,3],[3,3],[4,3],[5,3],[6,3],[7,3],[8,3],[9,3]].forEach(([x,y])=>px(ctx,x,y,s));
+    px(ctx,4,2,k); px(ctx,7,2,k);
+    for(let y=4;y<10;y++) for(let x=2;x<10;x++) px(ctx,x,y,b);
+    const ga=frame%2===0?[10,6,11,6,11,7]:[10,7,11,7,11,8];
+    for(let i=0;i<ga.length;i+=2) px(ctx,ga[i],ga[i+1],'#888');
+    if(frame===0) { for(let y=10;y<16;y++) { px(ctx,2,y,b); px(ctx,3,y,b); px(ctx,8,y,b); px(ctx,9,y,b); } }
+    else { px(ctx,2,10,b);px(ctx,3,10,b);px(ctx,8,10,b);px(ctx,9,10,b);px(ctx,1,11,b);px(ctx,2,11,b);px(ctx,9,11,b);px(ctx,10,11,b);px(ctx,1,12,fl);px(ctx,2,12,fl);px(ctx,9,12,fl);px(ctx,10,12,fl); }
+    if(dir===-1) ctx.restore();
+  }
+  for(let f=0;f<4;f++) for(const d of [1,-1]) { const c=makeCanvas(12,16); drawJanzi(c.getContext('2d'),f,d); SPRITES[`Janzi_${f}_${d}`]=c; }
+  const deadC=makeCanvas(12,16); const dctx=deadC.getContext('2d'); drawJanzi(dctx,0,1);
+  dctx.fillStyle='#ff0000'; dctx.fillRect(3,2,3,1); dctx.fillRect(4,1,1,3); dctx.fillRect(6,2,3,1); dctx.fillRect(7,1,1,3);
+  SPRITES['Janzi_dead']=deadC;
+
+  function makeEnemy(frame) {
+    const c=makeCanvas(12,14); const ctx=c.getContext('2d');
+    const g='#44cc44',dg='#228822',e='#ff0000',k='#000';
+    for(let y=2;y<12;y++) for(let x=1;x<11;x++) px(ctx,x,y,g);
+    px(ctx,2,1,g);px(ctx,3,1,g);px(ctx,5,0,g);px(ctx,6,0,g);px(ctx,8,1,g);px(ctx,9,1,g);
+    px(ctx,2,4,e);px(ctx,3,4,e);px(ctx,8,4,e);px(ctx,9,4,e);
+    for(let x=3;x<9;x++) px(ctx,x,8,k); px(ctx,3,7,k);px(ctx,8,7,k);
+    if(frame===0) { for(let y=12;y<14;y++) { px(ctx,2,y,dg);px(ctx,3,y,dg);px(ctx,8,y,dg);px(ctx,9,y,dg); } }
+    else { px(ctx,1,12,dg);px(ctx,2,12,dg);px(ctx,9,12,dg);px(ctx,10,12,dg);px(ctx,1,13,dg);px(ctx,2,13,dg);px(ctx,9,13,dg);px(ctx,10,13,dg); }
+    return c;
+  }
+  SPRITES['enemy_0']=makeEnemy(0); SPRITES['enemy_1']=makeEnemy(1);
+
+  const tC=makeCanvas(10,12); const tCtx=tC.getContext('2d');
+  [[3,0],[4,0],[5,0],[6,0],[2,1],[3,1],[4,1],[5,1],[6,1],[7,1],[2,2],[7,2],[2,3],[7,3],[3,4],[4,4],[5,4],[6,4],[4,5],[5,5],[4,6],[5,6],[2,7],[3,7],[4,7],[5,7],[6,7],[7,7],[1,8],[2,8],[3,8],[4,8],[5,8],[6,8],[7,8],[8,8]].forEach(([x,y])=>{ tCtx.fillStyle='#ffcc00'; tCtx.fillRect(x,y,1,1); });
+  [[3,1],[4,1],[5,1],[3,2],[4,2]].forEach(([x,y])=>{ tCtx.fillStyle='#ffee88'; tCtx.fillRect(x,y,1,1); });
+  SPRITES['trophy']=tC;
+
+  const kC=makeCanvas(8,10); const kCtx=kC.getContext('2d');
+  [[2,0],[3,0],[4,0],[5,0],[1,1],[6,1],[1,2],[6,2],[1,3],[6,3],[2,4],[3,4],[4,4],[5,4],[3,5],[3,6],[3,7],[3,8],[4,7],[5,7]].forEach(([x,y])=>{ kCtx.fillStyle='#ddaa00'; kCtx.fillRect(x,y,1,1); });
+  SPRITES['key']=kC;
+
+  const dC=makeCanvas(16,24); const drCtx=dC.getContext('2d');
+  drCtx.fillStyle='#663300'; drCtx.fillRect(0,0,16,24);
+  drCtx.fillStyle='#994400'; for(let y=2;y<22;y+=4) drCtx.fillRect(2,y,12,2);
+  drCtx.fillStyle='#ffcc00'; drCtx.fillRect(11,11,2,2);
+  drCtx.fillStyle='#331100'; drCtx.fillRect(0,0,1,24); drCtx.fillRect(15,0,1,24);
+  SPRITES['door']=dC;
+
+  const doC=makeCanvas(16,24); const doCtx=doC.getContext('2d');
+  doCtx.fillStyle='#001122'; doCtx.fillRect(0,0,16,24);
+  doCtx.fillStyle='#002244'; for(let y=0;y<24;y+=3) doCtx.fillRect(2,y,12,1);
+  doCtx.fillStyle='#004488'; doCtx.fillRect(7,10,2,4);
+  SPRITES['door_open']=doC;
+
+  const gC=makeCanvas(10,6); const gCtx=gC.getContext('2d');
+  [[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],[8,2],[9,2],[2,1],[3,1],[4,1],[2,3],[3,3],[4,3],[5,0],[6,0],[7,0],[5,1],[6,1],[7,1]].forEach(([x,y])=>{ gCtx.fillStyle='#888888'; gCtx.fillRect(x,y,1,1); });
+  SPRITES['gun']=gC;
+
+  const jpC=makeCanvas(10,14); const jpCtx=jpC.getContext('2d');
+  jpCtx.fillStyle='#4466ff'; jpCtx.fillRect(2,0,6,10);
+  jpCtx.fillStyle='#ff4400'; jpCtx.fillRect(3,10,1,3); jpCtx.fillRect(6,10,1,3);
+  jpCtx.fillStyle='#ffcc00'; jpCtx.fillRect(3,11,1,2); jpCtx.fillRect(6,11,1,2);
+  jpCtx.fillStyle='#aaccff'; jpCtx.fillRect(4,2,2,3);
+  SPRITES['jetpack']=jpC;
+
+  const lC=makeCanvas(8,8); const lCtx=lC.getContext('2d');
+  [[1,1],[2,1],[5,1],[6,1],[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],[0,3],[1,3],[2,3],[3,3],[4,3],[5,3],[6,3],[7,3],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[2,5],[3,5],[4,5],[5,5],[3,6],[4,6]].forEach(([x,y])=>{ lCtx.fillStyle='#ff2244'; lCtx.fillRect(x,y,1,1); });
+  SPRITES['life']=lC;
+
+  const bC=makeCanvas(4,2); const bCtx=bC.getContext('2d');
+  bCtx.fillStyle='#ffff44'; bCtx.fillRect(0,0,4,2);
+  SPRITES['bullet']=bC;
+
+  const spC=makeCanvas(16,8); const spCtx=spC.getContext('2d');
+  for(let i=0;i<4;i++) { spCtx.fillStyle='#aaaaaa'; spCtx.beginPath(); spCtx.moveTo(i*4+2,0); spCtx.lineTo(i*4,8); spCtx.lineTo(i*4+4,8); spCtx.fill(); spCtx.fillStyle='#cccccc'; spCtx.fillRect(i*4+1,4,2,1); }
+  SPRITES['spike']=spC;
+
+  function makeTile(bg,hi,sh) { const c=makeCanvas(16,16); const ctx=c.getContext('2d'); ctx.fillStyle=bg; ctx.fillRect(0,0,16,16); ctx.fillStyle=hi; ctx.fillRect(0,0,16,1); ctx.fillRect(0,0,1,16); ctx.fillStyle=sh; ctx.fillRect(0,15,16,1); ctx.fillRect(15,0,1,16); return c; }
+  SPRITES['tile_solid']=makeTile('#5566aa','#8899cc','#334488');
+  SPRITES['tile_brick']=makeTile('#884422','#aa6644','#553311');
+  SPRITES['tile_hazard']=makeTile('#cc2200','#ff4400','#881100');
+  SPRITES['ready']=true;
+})();
+
+const G = {
+  canvas:null,ctx:null,state:'menu',score:0,hiScore:parseInt(localStorage.getItem('dd_hi')||'0'),lives:3,level:0,
+  hasGun:false,hasJetpack:false,hasKey:false,trophiesLeft:0,doorOpen:false,camX:0,
+  map:null,mapW:0,mapH:0,bgColor:'#000',spawnX:0,spawnY:0,
+  player:null,enemies:[],items:[],bullets:[],particles:[],keys:{},invTimer:0,levelTransTimer:0
+};
+
+function makePlayer(x,y) { return {x,y,vx:0,vy:0,w:12,h:16,dir:1,onGround:false,frame:0,frameTimer:0,dead:false,jetFuel:0,shooting:false,shootCooldown:0}; }
+function makeEnemy(tx,ty) { return {x:tx*TILE_SIZE,y:ty*TILE_SIZE,vx:1.2,vy:0,w:12,h:14,dir:1,frame:0,frameTimer:0,dead:false,deadTimer:0,startX:tx*TILE_SIZE,patrolRange:80}; }
+function makeItem(type,tx,ty) { return {type,x:tx*TILE_SIZE,y:ty*TILE_SIZE,collected:false,bobTimer:0}; }
+function makeBullet(x,y,dir) { return {x,y,vx:dir*10,vy:0,dead:false}; }
+
+function loadLevel(idx) {
+  const ld=LEVELS[idx]; G.mapH=ld.tiles.length; G.mapW=ld.tiles[0].length; G.bgColor=ld.bgColor||'#000';
+  G.map=ld.tiles.map(row=>[...row]); G.enemies=[]; G.items=[]; G.bullets=[]; G.particles=[]; G.trophiesLeft=0; G.hasKey=false; G.doorOpen=false; G.hasJetpack=false; G.camX=0;
+  for(let row=0;row<G.mapH;row++) for(let col=0;col<G.mapW;col++) {
+    const t=G.map[row][col];
+    if(t===12){G.spawnX=col*TILE_SIZE;G.spawnY=row*TILE_SIZE;G.map[row][col]=0;}
+    else if(t===11){G.enemies.push(makeEnemy(col,row));G.map[row][col]=0;}
+    else if(t===4){G.items.push(makeItem('trophy',col,row));G.trophiesLeft++;G.map[row][col]=0;}
+    else if(t===5){G.items.push(makeItem('key',col,row));G.map[row][col]=0;}
+    else if(t===6){G.items.push(makeItem('door',col,row));G.map[row][col]=0;}
+    else if(t===7){G.items.push(makeItem('gun',col,row));G.map[row][col]=0;}
+    else if(t===14){G.items.push(makeItem('jetpack',col,row));G.map[row][col]=0;}
+    else if(t===15){G.items.push(makeItem('life',col,row));G.map[row][col]=0;}
+    else if(t>=20){
+      const ch=CUSTOM_CHARS.find(c=>c.tileId===t);
+      if(ch){G.enemies.push(_makeCustomEnemy(col,row,ch));G.map[row][col]=0;}
+    }
+  }
+  G.player=makePlayer(G.spawnX,G.spawnY); G.invTimer=0;
+}
+
+function tileAt(px,py) { const col=Math.floor(px/TILE_SIZE),row=Math.floor(py/TILE_SIZE); if(col<0||col>=G.mapW||row<0||row>=G.mapH) return 1; return G.map[row][col]; }
+function isSolid(px,py) { return TF.isSolid(tileAt(px,py)); }
+function rectOverlap(ax,ay,aw,ah,bx,by,bw,bh) { return ax<bx+bw&&ax+aw>bx&&ay<by+bh&&ay+ah>by; }
+
+function moveEntity(ent,gravity=true) {
+  const TS=TILE_SIZE;
+  if(gravity) ent.vy=Math.min(ent.vy+0.45,12);
+  ent.x+=ent.vx;
+  const left=ent.x,right=ent.x+ent.w-1,top=ent.y,bot=ent.y+ent.h-1;
+  if(ent.vx>0&&(isSolid(right,top+2)||isSolid(right,bot-2))){ent.x=Math.floor(right/TS)*TS-ent.w;ent.vx=0;}
+  if(ent.vx<0&&(isSolid(left,top+2)||isSolid(left,bot-2))){ent.x=Math.ceil(left/TS)*TS;ent.vx=0;}
+  ent.y+=ent.vy;
+  const left2=ent.x,right2=ent.x+ent.w-1,top2=ent.y,bot2=ent.y+ent.h-1;
+  ent.onGround=false;
+  if(ent.vy>=0&&(isSolid(left2+2,bot2)||isSolid(right2-2,bot2))){ent.y=Math.floor(bot2/TS)*TS-ent.h;ent.vy=0;ent.onGround=true;}
+  if(ent.vy<0&&(isSolid(left2+2,top2)||isSolid(right2-2,top2))){ent.y=Math.ceil(top2/TS)*TS;ent.vy=0;}
+}
+
+function updatePlayer(dt) {
+  const p=G.player; if(p.dead) return;
+  const speed=2.8; let moving=false;
+  if(G.keys['ArrowLeft']||G.keys['KeyA']){p.vx=-speed;p.dir=-1;moving=true;}
+  else if(G.keys['ArrowRight']||G.keys['KeyD']){p.vx=speed;p.dir=1;moving=true;}
+  else{p.vx*=0.7;if(Math.abs(p.vx)<0.1) p.vx=0;}
+  if(G.hasJetpack&&p.jetFuel>0){if(G.keys['Space']||G.keys['ArrowUp']){p.vy=-3.5;p.jetFuel=Math.max(0,p.jetFuel-1.5);spawnParticle(p.x+p.w/2,p.y+p.h,'#ff6600',0,2);}}
+  else if(G.keys['Space']||G.keys['ArrowUp']){if(p.onGround){p.vy=-9;sfxJump();G.keys['Space']=false;G.keys['ArrowUp']=false;}}
+  if((G.keys['ControlLeft']||G.keys['ControlRight']||G.keys['KeyZ'])&&G.hasGun){if(p.shootCooldown<=0){G.bullets.push(makeBullet(p.x+(p.dir===1?p.w:-4),p.y+5,p.dir));sfxShoot();p.shootCooldown=12;}}
+  if(p.shootCooldown>0) p.shootCooldown--;
+  if(p.onGround&&G.hasJetpack) p.jetFuel=Math.min(100,p.jetFuel+0.5);
+  moveEntity(p);
+  if(p.x<0){p.x=0;p.vx=0;} if(p.x+p.w>G.mapW*TILE_SIZE){p.x=G.mapW*TILE_SIZE-p.w;p.vx=0;}
+  const targetCamX=p.x-CANVAS_W/2+(p.w*TILE_SIZE)/2;
+  G.camX+=(targetCamX-G.camX)*0.15;
+  G.camX=Math.max(0,Math.min(G.camX,G.mapW*TILE_SIZE-CANVAS_W));
+  if(moving||!p.onGround){p.frameTimer++;if(p.frameTimer>6){p.frame=(p.frame+1)%4;p.frameTimer=0;}}else{p.frame=0;}
+  if(G.invTimer<=0){if(TF.isKill(tileAt(p.x+p.w/2,p.y+p.h-2))) killPlayer();if(TF.isKill(tileAt(p.x+p.w/2,p.y))) killPlayer();}
+  if(p.y>G.mapH*TILE_SIZE+64) killPlayer();
+  if(G.invTimer>0) G.invTimer--;
+}
+
+function updateItems() {
+  const p=G.player; if(p.dead) return;
+  for(const item of G.items) {
+    if(item.collected) continue;
+    item.bobTimer+=0.06;
+    if(!rectOverlap(p.x,p.y,p.w,p.h,item.x,item.y,TILE_SIZE,TILE_SIZE)) continue;
+    item.collected=true; sfxCollect();
+    switch(item.type) {
+      case 'trophy': G.score+=500;G.trophiesLeft--;addScoreParticle(item.x,item.y,'+500'); break;
+      case 'key': G.hasKey=true;showMsg('KEY!');addScoreParticle(item.x,item.y,'KEY!'); break;
+      case 'door':
+        if(G.hasKey&&G.trophiesLeft===0){sfxDoor();showMsg('NEXT LEVEL!');G.doorOpen=true;G.score+=1000;G.levelTransTimer=120;}
+        else if(!G.hasKey){item.collected=false;showMsg('NEED KEY!');}
+        else{item.collected=false;showMsg(`${G.trophiesLeft} TROPHIES LEFT!`);}
+        break;
+      case 'gun': G.hasGun=true;showMsg('GUN!');addScoreParticle(item.x,item.y,'GUN!'); break;
+      case 'jetpack': G.hasJetpack=true;p.jetFuel=100;showMsg('JETPACK!'); break;
+      case 'life': G.lives++;showMsg('+1 UP!');addScoreParticle(item.x,item.y,'+1 UP!'); break;
+    }
+  }
+}
+
+function updateEnemies() {
+  const p=G.player;
+  for(const e of G.enemies) {
+    if(e.dead){e.deadTimer--;continue;}
+    if(e.behavior){
+      const spd=e.speed||1.4;
+      if(e.behavior==='flying'){
+        // Flying: move horizontally, bob vertically, no gravity
+        e.x+=e.dir*spd;
+        e.y+=Math.sin(Date.now()*0.003+e.startX*0.01)*0.7;
+        if(Math.abs(e.x-e.startX)>e.patrolRange){e.dir*=-1;}
+        e.frameTimer++;if(e.frameTimer>10){e.frame=(e.frame+1)%2;e.frameTimer=0;}
+      } else if(e.behavior==='jumper'){
+        // Jumper: walks and jumps, only flip dir on wall hit (vx===0 after moveEntity)
+        const prevVx=e.vx;
+        e.vx=e.dir*spd;
+        moveEntity(e);
+        // Wall hit = moveEntity zeroed vx
+        if(e.vx===0&&prevVx!==0){e.dir*=-1;e.x+=e.dir*4;}
+        // Patrol range reversal
+        if(Math.abs(e.x-e.startX)>e.patrolRange){e.dir*=-1;e.x+=e.dir*4;}
+        // Jump when grounded
+        if(e.onGround){e.jumpTimer--;if(e.jumpTimer<=0){e.vy=-8.5;e.jumpTimer=50+Math.floor(Math.random()*40);}}
+        e.frameTimer++;if(e.frameTimer>6){e.frame=(e.frame+1)%2;e.frameTimer=0;}
+      } else {
+        // Patrol / Fast: walks back and forth, only reverse on wall collision
+        const prevVx=e.vx;
+        e.vx=e.dir*spd;
+        moveEntity(e);
+        // Wall hit reversal (moveEntity set vx to 0)
+        if(e.vx===0&&prevVx!==0){e.dir*=-1;e.x+=e.dir*4;}
+        // Patrol range reversal
+        if(Math.abs(e.x-e.startX)>e.patrolRange){e.dir*=-1;e.x+=e.dir*4;}
+        const rate=e.behavior==='fast'?4:8;
+        e.frameTimer++;if(e.frameTimer>rate){e.frame=(e.frame+1)%2;e.frameTimer=0;}
+      }
+    } else {
+      // Default built-in enemy
+      const prevVx=e.vx;
+      e.vx=e.dir*1.4;
+      moveEntity(e);
+      if(e.vx===0&&prevVx!==0){e.dir*=-1;e.x+=e.dir*4;}
+      if(Math.abs(e.x-e.startX)>e.patrolRange) e.dir*=-1;
+      e.frameTimer++;if(e.frameTimer>8){e.frame=(e.frame+1)%2;e.frameTimer=0;}
+    }
+    if(G.invTimer<=0&&!p.dead&&rectOverlap(p.x+2,p.y+2,p.w-4,p.h-4,e.x,e.y,e.w,e.h)) killPlayer();
+  }
+}
+
+function updateBullets() {
+  for(const b of G.bullets) {
+    if(b.dead) continue; b.x+=b.vx;
+    if(isSolid(b.x,b.y)||isSolid(b.x,b.y+1)){b.dead=true;spawnParticle(b.x,b.y,'#ffff44',0,0);continue;}
+    if(b.x<G.camX-32||b.x>G.camX+CANVAS_W+32){b.dead=true;continue;}
+    for(const e of G.enemies) {
+      if(e.dead) continue;
+      if(rectOverlap(b.x,b.y,4,2,e.x,e.y,e.w,e.h)){b.dead=true;e.dead=true;e.deadTimer=30;const pts=e.scoreVal||300;G.score+=pts;addScoreParticle(e.x,e.y,'+'+pts);const pc=e.tileId?TILE_COLORS[e.tileId]||'#44cc44':'#44cc44';for(let i=0;i<6;i++) spawnParticle(e.x+6,e.y+7,pc,(Math.random()-0.5)*3,-Math.random()*3);sfxCollect();}
+    }
+  }
+  G.bullets=G.bullets.filter(b=>!b.dead);
+}
+
+function spawnParticle(x,y,color,vx,vy) { G.particles.push({x,y,vx:vx+(Math.random()-0.5)*1.5,vy:vy-Math.random()*1.5,color,life:20+Math.random()*20,maxLife:30}); }
+function addScoreParticle(x,y,txt) { G.particles.push({x,y,vx:0,vy:-0.8,color:'#ffcc00',life:60,maxLife:60,text:txt}); }
+function updateParticles() { for(const p of G.particles){p.x+=p.vx;p.y+=p.vy;p.vy+=0.1;p.life--;} G.particles=G.particles.filter(p=>p.life>0); }
+
+function killPlayer() {
+  if(G.invTimer>0||G.player.dead) return;
+  sfxDie(); G.player.dead=true; G.lives--;
+  for(let i=0;i<12;i++) spawnParticle(G.player.x+6,G.player.y+8,'#ff4444',(Math.random()-0.5)*4,-Math.random()*4);
+  setTimeout(()=>{
+    if(G.lives<=0){if(G.score>G.hiScore){G.hiScore=G.score;localStorage.setItem('dd_hi',G.hiScore);}switchState('gameover');}
+    else{G.player=makePlayer(G.spawnX,G.spawnY);G.hasGun=false;G.hasJetpack=false;G.invTimer=120;showMsg('READY!');}
+  },1500);
+}
+
+function render() {
+  const ctx=G.ctx; ctx.clearRect(0,0,CANVAS_W,CANVAS_H);
+  ctx.fillStyle=G.bgColor; ctx.fillRect(0,0,CANVAS_W,CANVAS_H);
+  drawStars(ctx);
+  const cx=Math.floor(G.camX);
+  const startCol=Math.floor(cx/TILE_SIZE), endCol=startCol+COLS_VIS+2;
+  for(let row=0;row<G.mapH;row++) for(let col=startCol;col<=endCol;col++) {
+    if(col<0||col>=G.mapW) continue;
+    const t=G.map[row][col]; if(t===0) continue;
+    const sx=col*TILE_SIZE-cx, sy=row*TILE_SIZE;
+    if(t===3){ctx.save();ctx.translate(sx,sy+TILE_SIZE-8*2);ctx.scale(2,2);ctx.drawImage(SPRITES['spike'],0,0);ctx.restore();}
+    else if(t===8){ctx.save();ctx.translate(sx,sy);ctx.scale(2,2);ctx.drawImage(SPRITES['tile_hazard'],0,0);ctx.restore();}
+    else if(t===2){ctx.save();ctx.translate(sx,sy);ctx.scale(2,2);ctx.drawImage(SPRITES['tile_brick'],0,0);ctx.restore();}
+    else{ctx.save();ctx.translate(sx,sy);ctx.scale(2,2);ctx.drawImage(SPRITES['tile_solid'],0,0);ctx.restore();}
+  }
+  for(const item of G.items) {
+    if(item.collected) continue;
+    const sx=item.x-cx; if(sx<-TILE_SIZE||sx>CANVAS_W+TILE_SIZE) continue;
+    const bob=Math.sin(item.bobTimer)*3;
+    ctx.save(); const sy=item.y+bob; ctx.translate(sx,sy);
+    switch(item.type) {
+      case 'trophy': ctx.scale(2.8,2.8);ctx.drawImage(SPRITES['trophy'],0,0);ctx.restore();ctx.save();ctx.globalAlpha=0.3+Math.abs(Math.sin(item.bobTimer))*0.2;ctx.shadowColor='#ffcc00';ctx.shadowBlur=12;ctx.translate(sx,sy);ctx.scale(2.8,2.8);ctx.drawImage(SPRITES['trophy'],0,0); break;
+      case 'key': ctx.scale(3,3);ctx.drawImage(SPRITES['key'],0,0); break;
+      case 'door': ctx.scale(2,1.33);ctx.drawImage(SPRITES['door_open'],0,0); break;
+      case 'gun': ctx.scale(3,3);ctx.drawImage(SPRITES['gun'],0,0); break;
+      case 'jetpack': ctx.scale(3,2);ctx.drawImage(SPRITES['jetpack'],0,0); break;
+      case 'life': ctx.scale(4,4);ctx.drawImage(SPRITES['life'],0,0); break;
+    }
+    ctx.restore();
+  }
+  for(const e of G.enemies) {
+    if(e.dead) continue;
+    const sx=e.x-cx; if(sx<-32||sx>CANVAS_W+32) continue;
+    ctx.save();ctx.translate(sx,e.y);
+    const _ek='custom_'+e.tileId+'_'+e.frame;
+    const _eflip=e.behavior==='flying'?e.dir<0:e.dir===-1;
+    if(_eflip){ctx.scale(-1,1);ctx.translate(-e.w*2,0);}
+    ctx.scale(2.2,2.2);ctx.drawImage(SPRITES[e.tileId&&SPRITES[_ek]?_ek:'enemy_'+e.frame],0,0);ctx.restore();
+  }
+  for(const b of G.bullets) {
+    const sx=b.x-cx; ctx.save(); ctx.shadowColor='#ffff88';ctx.shadowBlur=8;ctx.scale(2,2);ctx.drawImage(SPRITES['bullet'],Math.floor(sx/2),Math.floor(b.y/2));ctx.restore();
+  }
+  const p=G.player; const psx=p.x-cx;
+  if(!p.dead) {
+    ctx.save();
+    if(G.invTimer>0&&Math.floor(G.invTimer/4)%2===0) ctx.globalAlpha=0.3;
+    ctx.translate(psx,p.y);
+    if(p.dir===-1){ctx.scale(-1,1);ctx.translate(-p.w*2.5,0);}
+    ctx.scale(2.5,2);ctx.drawImage(SPRITES[`Janzi_${p.frame}_1`],0,0);ctx.restore();
+  } else {
+    ctx.save();ctx.translate(psx,p.y);ctx.scale(2.5,2);ctx.drawImage(SPRITES['Janzi_dead'],0,0);ctx.restore();
+  }
+  for(const pt of G.particles) {
+    if(pt.text){ctx.globalAlpha=pt.life/pt.maxLife;ctx.fillStyle=pt.color;ctx.font='7px "Press Start 2P",monospace';ctx.fillText(pt.text,pt.x-cx,pt.y);ctx.globalAlpha=1;}
+    else{ctx.globalAlpha=pt.life/pt.maxLife;ctx.fillStyle=pt.color;ctx.fillRect(Math.floor(pt.x-cx),Math.floor(pt.y),3,3);ctx.globalAlpha=1;}
+  }
+  updateHUD();
+}
+
+const STARS=Array.from({length:60},()=>({x:Math.random()*CANVAS_W,y:Math.random()*CANVAS_H,r:Math.random()*1.5+0.5,a:Math.random()*0.7+0.1,parallax:Math.random()*0.3}));
+function drawStars(ctx) {
+  for(const s of STARS){const sx=((s.x-G.camX*s.parallax)%CANVAS_W+CANVAS_W)%CANVAS_W;ctx.globalAlpha=s.a;ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(sx,s.y,s.r,0,Math.PI*2);ctx.fill();}
+  ctx.globalAlpha=1;
+}
+
+function updateHUD() {
+  document.getElementById('hud-score').textContent=String(G.score).padStart(7,'0');
+  document.getElementById('hud-hi').textContent=String(G.hiScore).padStart(7,'0');
+  document.getElementById('hud-lives').textContent='♥'.repeat(Math.max(0,G.lives));
+  document.getElementById('hud-level').textContent=LEVELS[G.level].name;
+  document.getElementById('hud-trophy').textContent=G.trophiesLeft;
+  document.getElementById('hud-gun').textContent=G.hasGun?'YES':'NO';
+  document.getElementById('hud-key').textContent=G.hasKey?'YES':'NO';
+}
+
+function showMsg(txt,duration=90) { G.msgText=txt;G.msgTimer=duration;const el=document.getElementById('msg-overlay');el.textContent=txt;el.classList.add('visible'); }
+function clearMsg() { G.msgText='';G.msgTimer=0;document.getElementById('msg-overlay').classList.remove('visible'); }
+
+function gameLoop(ts) {
+  if(G.state!=='playing') return;
+  G.animFrame=requestAnimationFrame(gameLoop);
+  const dt=Math.min((ts-G.lastTime)/16.67,3); G.lastTime=ts; G.frameCount++;
+  updatePlayer(dt); updateEnemies(); updateBullets(); updateItems(); updateParticles();
+  if(G.msgTimer>0){G.msgTimer--;if(G.msgTimer===0) clearMsg();}
+  if(G.levelTransTimer>0){
+    G.levelTransTimer--;
+    if(G.levelTransTimer===0){
+      G.level++;
+      if(G.level>=LEVELS.length){G.level=0;if(G.score>G.hiScore){G.hiScore=G.score;localStorage.setItem('dd_hi',G.hiScore);}switchState('gameover');return;}
+      sfxLevelUp();loadLevel(G.level);showMsg(LEVELS[G.level].name,120);
+    }
+  }
+  render();
+}
+
+function switchState(state) {
+  cancelAnimationFrame(G.animFrame); G.state=state;
+  document.querySelectorAll('[id^="screen-"]').forEach(s=>s.classList.remove('active'));
+  if(state==='menu'){document.getElementById('screen-menu').classList.add('active');document.getElementById('menu-hi').innerHTML=`HI-SCORE: <span>${String(G.hiScore).padStart(7,'0')}</span>`;}
+  else if(state==='playing'){document.getElementById('screen-game').classList.add('active');G.lastTime=performance.now();showMsg(LEVELS[G.level].name,120);G.animFrame=requestAnimationFrame(gameLoop);}
+  else if(state==='editor'){document.getElementById('screen-editor').classList.add('active');initEditor();}
+  else if(state==='gameover'){document.getElementById('screen-gameover').classList.add('active');document.getElementById('go-score').textContent=String(G.score).padStart(7,'0');document.getElementById('go-hi').textContent=String(G.hiScore).padStart(7,'0');}
+}
+
+let ED={levelIdx:0,selectedTile:1,painting:false,erasing:false,zoom:2,map:null,mapW:0,mapH:0,canvas:null,ctx:null};
+const TILE_NAMES={0:'Empty',1:'Ground',2:'Brick',3:'Spike',4:'Trophy',5:'Key',6:'Door',7:'Gun',8:'Lava',9:'Ladder',10:'Platform',11:'Enemy',12:'Spawn',14:'Jetpack',15:'Life'};
+const TILE_COLORS={0:'#000',1:'#5566aa',2:'#884422',3:'#888888',4:'#ffcc00',5:'#ddaa00',6:'#663300',7:'#888888',8:'#cc2200',9:'#226622',10:'#445544',11:'#44cc44',12:'#00aaff',14:'#4466ff',15:'#ff2244'};
+
+// ═══════════════════════════════════════════════════════════
+// CUSTOM CHARACTER SYSTEM
+// ═══════════════════════════════════════════════════════════
+const CUSTOM_CHARS = [];
+let _nextCharTileId = 20;
+
+function registerCustomChar(def) {
+  const ch = Object.assign({}, def, { tileId: def.tileId || _nextCharTileId++ });
+  const idx = CUSTOM_CHARS.findIndex(c => c.tileId === ch.tileId);
+  if (idx >= 0) CUSTOM_CHARS.splice(idx, 1);
+  CUSTOM_CHARS.push(ch);
+  TILE_NAMES[ch.tileId]  = ch.name;
+  TILE_COLORS[ch.tileId] = ch.color;
+  _buildCustomSprite(ch);
+  return ch;
+}
+
+function _buildCustomSprite(ch) {
+  function px(ctx,x,y,col){ctx.fillStyle=col;ctx.fillRect(x,y,1,1);}
+  function adj(hex,d){
+    const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+    return 'rgb('+Math.min(255,Math.max(0,r+d))+','+Math.min(255,Math.max(0,g+d))+','+Math.min(255,Math.max(0,b+d))+')';
+  }
+  const flying = ch.behavior==='flying';
+  const fast   = ch.behavior==='fast';
+  const jump   = ch.behavior==='jumper';
+  for(let frame=0;frame<2;frame++){
+    const c=document.createElement('canvas');
+    c.width=12; c.height=flying?12:14;
+    const ctx=c.getContext('2d');
+    const bg=ch.color, hi=adj(ch.color,60), dk=adj(ch.color,-50), eye=ch.eyeColor||'#ff0000';
+    if(flying){
+      for(let y=1;y<11;y++) for(let x=1;x<11;x++) px(ctx,x,y,bg);
+      [2,9].forEach(x=>px(ctx,x,0,bg));[2,9].forEach(x=>px(ctx,x,11,bg));
+      px(ctx,0,3,bg);px(ctx,11,3,bg);px(ctx,0,8,bg);px(ctx,11,8,bg);
+      px(ctx,3,4,eye);px(ctx,4,4,eye);px(ctx,7,4,eye);px(ctx,8,4,eye);
+      px(ctx,4,7,hi);px(ctx,5,7,hi);px(ctx,6,7,hi);
+      if(frame===0){px(ctx,0,4,hi);px(ctx,0,5,hi);px(ctx,11,4,hi);px(ctx,11,5,hi);}
+      else{px(ctx,0,6,hi);px(ctx,0,7,hi);px(ctx,11,6,hi);px(ctx,11,7,hi);}
+    } else {
+      for(let y=0;y<8;y++) for(let x=1;x<11;x++) px(ctx,x,y,bg);
+      px(ctx,2,0,hi);px(ctx,3,0,hi);px(ctx,5,0,hi);px(ctx,6,0,hi);px(ctx,8,0,hi);px(ctx,9,0,hi);
+      px(ctx,2,3,eye);px(ctx,3,3,eye);px(ctx,8,3,eye);px(ctx,9,3,eye);
+      if(jump){
+        for(let x=3;x<9;x++) px(ctx,x,6,'#000');
+        px(ctx,4,5,'#fff');px(ctx,7,5,'#fff');
+      } else {
+        for(let x=3;x<9;x++) px(ctx,x,6,dk);
+      }
+      if(frame===0){
+        for(let y=8;y<14;y++){px(ctx,2,y,dk);px(ctx,3,y,dk);px(ctx,8,y,dk);px(ctx,9,y,dk);}
+      } else {
+        px(ctx,1,8,dk);px(ctx,2,8,dk);px(ctx,9,8,dk);px(ctx,10,8,dk);
+        px(ctx,1,9,dk);px(ctx,2,9,dk);px(ctx,9,9,dk);px(ctx,10,9,dk);
+        for(let y=10;y<14;y++){px(ctx,2,y,dk);px(ctx,3,y,dk);px(ctx,8,y,dk);px(ctx,9,y,dk);}
+      }
+      if(fast){px(ctx,0,2,'rgba(255,255,255,.4)');px(ctx,0,4,'rgba(255,255,255,.3)');px(ctx,0,6,'rgba(255,255,255,.2)');}
+    }
+    SPRITES['custom_'+ch.tileId+'_'+frame] = c;
+  }
+}
+
+function _makeCustomEnemy(col, row, ch) {
+  const flying = ch.behavior==='flying';
+  // Spawn slightly above tile row so gravity settles them onto the floor naturally
+  const spawnY = row*TILE_SIZE - (flying ? 0 : 2);
+  return {
+    x:col*TILE_SIZE, y:spawnY, vx:0, vy:0,
+    w:12, h:(flying?12:14),
+    dir:1, frame:0, frameTimer:0, dead:false, deadTimer:0,
+    startX:col*TILE_SIZE, patrolRange:ch.patrolRange,
+    tileId:ch.tileId, behavior:ch.behavior, speed:ch.speed, scoreVal:ch.score,
+    jumpTimer:50, onGround:false
+  };
+}
+
+function saveCharsToStorage(){
+  try{localStorage.setItem('dg_custom_chars',JSON.stringify(CUSTOM_CHARS));}catch(e){}
+}
+function loadCharsFromStorage(){
+  try{
+    const arr=JSON.parse(localStorage.getItem('dg_custom_chars')||'[]');
+    arr.forEach(def=>{if(def.tileId>=_nextCharTileId)_nextCharTileId=def.tileId+1;registerCustomChar(def);});
+  }catch(e){}
+}
+
+// Editor: character list sidebar
+function buildCharList(){
+  const list=document.getElementById('char-list');
+  if(!list) return;
+  list.innerHTML='';
+  if(!CUSTOM_CHARS.length){
+    list.innerHTML='<div style="font-size:6px;color:#333;padding:4px 0;">No custom chars yet.</div>';
+    return;
+  }
+  CUSTOM_CHARS.forEach(ch=>{
+    const spr=SPRITES['custom_'+ch.tileId+'_0'];
+    const row=document.createElement('div');
+    row.className='char-entry'+(ED.selectedTile===ch.tileId?' active':'');
+    // swatch canvas
+    const sw=document.createElement('canvas');sw.className='char-swatch';sw.width=14;sw.height=14;
+    const sc=sw.getContext('2d');sc.fillStyle=ch.color;sc.fillRect(0,0,14,14);
+    if(spr){sc.imageSmoothingEnabled=false;sc.drawImage(spr,1,1,12,12);}
+    row.appendChild(sw);
+    const nm=document.createElement('div');nm.className='char-label';nm.textContent=ch.name;row.appendChild(nm);
+    const del=document.createElement('div');del.className='char-del';del.textContent='✕';del.title='Delete';
+    del.addEventListener('click',e=>{
+      e.stopPropagation();
+      if(!confirm('Delete "'+ch.name+'"?')) return;
+      CUSTOM_CHARS.splice(CUSTOM_CHARS.indexOf(ch),1);
+      delete TILE_NAMES[ch.tileId];delete TILE_COLORS[ch.tileId];
+      for(let r=0;r<ED.mapH;r++) for(let c2=0;c2<ED.mapW;c2++) if(ED.map[r][c2]===ch.tileId) ED.map[r][c2]=0;
+      saveCharsToStorage();buildPalette();buildCharList();renderEditor();
+    });
+    row.appendChild(del);
+    row.addEventListener('click',()=>{
+      ED.selectedTile=ch.tileId;
+      document.querySelectorAll('.tile-btn').forEach(b=>b.classList.remove('selected'));
+      document.querySelectorAll('.char-entry').forEach(b=>b.classList.remove('active'));
+      row.classList.add('active');
+    });
+    list.appendChild(row);
+  });
+}
+
+// Modal helpers
+let _editingTileId=null;
+function openCharModal(tileId){
+  _editingTileId=tileId||null;
+  const ch=tileId?CUSTOM_CHARS.find(c=>c.tileId===tileId):null;
+  document.getElementById('char-modal-title').innerHTML=(ch?'&#9998; EDIT':'&#9632; NEW')+' CHARACTER';
+  document.getElementById('char-name').value    = ch?ch.name:'CUSTOM';
+  document.getElementById('char-color').value   = ch?ch.color:'#cc4444';
+  document.getElementById('char-eyecolor').value= ch?(ch.eyeColor||'#ff0000'):'#ff0000';
+  document.getElementById('char-behavior').value= ch?ch.behavior:'patrol';
+  document.getElementById('char-speed').value   = ch?ch.speed:1.4;
+  document.getElementById('char-range').value   = ch?ch.patrolRange:80;
+  document.getElementById('char-score').value   = ch?ch.score:300;
+  _refreshModalLabels();_refreshModalPreview();
+  document.getElementById('char-modal-bg').classList.add('open');
+}
+function closeCharModal(){
+  document.getElementById('char-modal-bg').classList.remove('open');
+  _editingTileId=null;
+}
+function _refreshModalLabels(){
+  document.getElementById('rv-speed').textContent=parseFloat(document.getElementById('char-speed').value).toFixed(1);
+  document.getElementById('rv-range').textContent=document.getElementById('char-range').value;
+  document.getElementById('rv-score').textContent=document.getElementById('char-score').value;
+}
+function _refreshModalPreview(){
+  const color=document.getElementById('char-color').value;
+  const eye  =document.getElementById('char-eyecolor').value;
+  const beh  =document.getElementById('char-behavior').value;
+  const name =(document.getElementById('char-name').value||'?').toUpperCase();
+  const spd  =parseFloat(document.getElementById('char-speed').value).toFixed(1);
+  const rng  =document.getElementById('char-range').value;
+  const scr  =document.getElementById('char-score').value;
+  // Build temp sprite
+  const tmp={tileId:9999,name,color,eyeColor:eye,behavior:beh,speed:spd,patrolRange:rng,score:scr};
+  _buildCustomSprite(tmp);
+  const cv=document.getElementById('char-prev-cnv');
+  const cx2=cv.getContext('2d');
+  cx2.clearRect(0,0,cv.width,cv.height);
+  cx2.fillStyle='#0a0a0f';cx2.fillRect(0,0,cv.width,cv.height);
+  const spr=SPRITES['custom_9999_0'];
+  if(spr){cx2.imageSmoothingEnabled=false;cx2.save();cx2.scale(4,4);cx2.drawImage(spr,0,0);cx2.restore();}
+  const bl={patrol:'Walks back & forth',fast:'Fast patrol',flying:'Hovers (no gravity)',jumper:'Bounces on platforms'};
+  document.getElementById('char-prev-info').innerHTML=
+    '<span style="color:'+color+'">'+name+'</span><br>'+
+    (bl[beh]||beh)+'<br>Speed: '+spd+'<br>Range: '+rng+'px<br>Score: '+scr+' pts';
+}
+function saveCharModal(){
+  const def={
+    name:(document.getElementById('char-name').value||'CUSTOM').toUpperCase().slice(0,12),
+    color:document.getElementById('char-color').value,
+    eyeColor:document.getElementById('char-eyecolor').value,
+    behavior:document.getElementById('char-behavior').value,
+    speed:parseFloat(document.getElementById('char-speed').value),
+    patrolRange:parseInt(document.getElementById('char-range').value),
+    score:parseInt(document.getElementById('char-score').value)
+  };
+  if(_editingTileId) def.tileId=_editingTileId;
+  const ch=registerCustomChar(def);
+  saveCharsToStorage();
+  buildPalette();buildCharList();renderEditor();
+  ED.selectedTile=ch.tileId;
+  closeCharModal();
+}
+
+function initEditor(){ED.canvas=document.getElementById('editorCanvas');ED.ctx=ED.canvas.getContext('2d');ED.levelIdx=0;loadEditorLevel(0);buildPalette();buildCharList();renderEditor();}
+function loadEditorLevel(idx){const ld=LEVELS[idx];ED.mapH=ld.tiles.length;ED.mapW=ld.tiles[0].length;ED.map=ld.tiles.map(r=>[...r]);ED.canvas.width=ED.mapW*TILE_SIZE;ED.canvas.height=ED.mapH*TILE_SIZE;renderEditor();}
+function buildPalette(){
+  const pal=document.getElementById('tile-palette');pal.innerHTML='';
+  const base=[0,1,2,3,4,5,6,7,8,11,12,14,15];
+  const tileList=base.concat(CUSTOM_CHARS.map(c=>c.tileId));
+  for(const tid of tileList){
+    const btn=document.createElement('canvas');btn.width=32;btn.height=32;
+    btn.title=TILE_NAMES[tid]||tid;
+    const ctx=btn.getContext('2d');
+    const spr=SPRITES['custom_'+tid+'_0'];
+    if(spr){ctx.fillStyle='#111';ctx.fillRect(0,0,32,32);ctx.imageSmoothingEnabled=false;ctx.save();ctx.scale(2.5,2.5);ctx.drawImage(spr,1,1);ctx.restore();}
+    else{ctx.fillStyle=TILE_COLORS[tid]||'#333';ctx.fillRect(0,0,32,32);}
+    ctx.fillStyle='#ffffff44';ctx.font='7px monospace';ctx.fillText((TILE_NAMES[tid]||tid).toString().slice(0,3),2,22);
+    btn.className='tile-btn'+(tid===ED.selectedTile?' selected':'');
+    btn.addEventListener('click',()=>{
+      ED.selectedTile=tid;
+      document.querySelectorAll('.tile-btn').forEach(b=>b.classList.remove('selected'));
+      document.querySelectorAll('.char-entry').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('selected');
+    });
+    pal.appendChild(btn);
+  }
+}
+function renderEditor(){if(!ED.ctx)return;const ctx=ED.ctx;ctx.fillStyle='#000';ctx.fillRect(0,0,ED.canvas.width,ED.canvas.height);for(let row=0;row<ED.mapH;row++)for(let col=0;col<ED.mapW;col++){const t=ED.map[row][col],x=col*TILE_SIZE,y=row*TILE_SIZE;ctx.fillStyle=TILE_COLORS[t]||'#111';ctx.fillRect(x,y,TILE_SIZE,TILE_SIZE);ctx.strokeStyle='#1a1a2e';ctx.strokeRect(x,y,TILE_SIZE,TILE_SIZE);if(t!==0){ctx.fillStyle='#ffffff33';ctx.font='7px monospace';ctx.fillText(t,x+2,y+12);}}}
+function editorPaint(ex,ey){const rect=ED.canvas.getBoundingClientRect();const scaleX=ED.canvas.width/rect.width,scaleY=ED.canvas.height/rect.height;const x=(ex-rect.left)*scaleX,y=(ey-rect.top)*scaleY;const col=Math.floor(x/TILE_SIZE),row=Math.floor(y/TILE_SIZE);if(col>=0&&col<ED.mapW&&row>=0&&row<ED.mapH){ED.map[row][col]=ED.erasing?0:ED.selectedTile;renderEditor();document.getElementById('ed-coords').textContent=`Col:${col} Row:${row} Tile:${TILE_NAMES[ED.map[row][col]]||ED.map[row][col]}`;}}
+function exportLevel(){const json=JSON.stringify({name:LEVELS[ED.levelIdx].name,width:ED.mapW,height:ED.mapH,tiles:ED.map},null,2);const blob=new Blob([json],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`level_${ED.levelIdx+1}.json`;a.click();}
+function importLevel(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=ev=>{try{const data=JSON.parse(ev.target.result);LEVELS[ED.levelIdx].tiles=data.tiles;LEVELS[ED.levelIdx].name=data.name||LEVELS[ED.levelIdx].name;loadEditorLevel(ED.levelIdx);}catch(err){alert('Invalid JSON');}};reader.readAsText(file);}
+function playTestLevel(){LEVELS[ED.levelIdx].tiles=ED.map.map(r=>[...r]);G.level=ED.levelIdx;G.score=0;G.lives=3;G.hasGun=false;G.hasJetpack=false;loadLevel(G.level);switchState('playing');}
+
+document.addEventListener('keydown',e=>{
+  G.keys[e.code]=true;
+  if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)&&G.state==='playing') e.preventDefault();
+  if(e.code==='ControlLeft'||e.code==='ControlRight') e.preventDefault();
+  if(e.code==='Escape'&&G.state==='playing'){cancelAnimationFrame(G.animFrame);G.state='menu';switchState('menu');}
+});
+document.addEventListener('keyup',e=>{G.keys[e.code]=false;});
+
+window.addEventListener('load',()=>{
+  G.canvas=document.getElementById('gameCanvas'); G.ctx=G.canvas.getContext('2d');
+  G.canvas.width=CANVAS_W; G.canvas.height=CANVAS_H;
+
+  document.getElementById('btn-play').addEventListener('click',()=>{G.score=0;G.lives=3;G.level=0;G.hasGun=false;G.hasJetpack=false;loadLevel(0);switchState('playing');});
+  document.getElementById('btn-editor').addEventListener('click',()=>switchState('editor'));
+  document.getElementById('btn-menu').addEventListener('click',()=>switchState('menu'));
+  document.getElementById('btn-gomenu').addEventListener('click',()=>switchState('menu'));
+  document.getElementById('btn-retry').addEventListener('click',()=>{G.score=0;G.lives=3;G.level=0;G.hasGun=false;G.hasJetpack=false;loadLevel(0);switchState('playing');});
+  document.getElementById('btn-ed-menu').addEventListener('click',()=>switchState('menu'));
+  document.getElementById('btn-ed-play').addEventListener('click',playTestLevel);
+  document.getElementById('btn-ed-export').addEventListener('click',exportLevel);
+  document.getElementById('btn-ed-import').addEventListener('click',()=>document.getElementById('ed-import-input').click());
+  document.getElementById('ed-import-input').addEventListener('change',importLevel);
+  document.getElementById('btn-ed-clear').addEventListener('click',()=>{ED.map=Array.from({length:ED.mapH},()=>Array(ED.mapW).fill(0));renderEditor();});
+  document.getElementById('btn-ed-fill').addEventListener('click',()=>{for(let col=0;col<ED.mapW;col++){ED.map[ED.mapH-1][col]=1;ED.map[ED.mapH-2][col]=1;}renderEditor();});
+
+  const sel=document.getElementById('ed-level-select');
+  LEVELS.forEach((l,i)=>{const opt=document.createElement('option');opt.value=i;opt.textContent=l.name;sel.appendChild(opt);});
+  sel.addEventListener('change',e=>{ED.levelIdx=parseInt(e.target.value);loadEditorLevel(ED.levelIdx);});
+
+  const edWrap=document.getElementById('editor-canvas-wrap');
+  edWrap.addEventListener('mousedown',e=>{ED.painting=true;ED.erasing=e.button===2;editorPaint(e.clientX,e.clientY);});
+  edWrap.addEventListener('mousemove',e=>{if(ED.painting) editorPaint(e.clientX,e.clientY);});
+  edWrap.addEventListener('mouseup',()=>{ED.painting=false;});
+  edWrap.addEventListener('mouseleave',()=>{ED.painting=false;});
+  edWrap.addEventListener('contextmenu',e=>{e.preventDefault();ED.erasing=true;editorPaint(e.clientX,e.clientY);return false;});
+
+  // Custom character system init
+  loadCharsFromStorage();
+  document.getElementById('btn-add-char').addEventListener('click',()=>openCharModal(null));
+  document.getElementById('char-cancel').addEventListener('click',closeCharModal);
+  document.getElementById('char-save').addEventListener('click',saveCharModal);
+  // Modal live preview
+  ['char-color','char-eyecolor','char-behavior','char-name'].forEach(id=>{
+    document.getElementById(id).addEventListener('input',_refreshModalPreview);
+  });
+  ['char-speed','char-range','char-score'].forEach(id=>{
+    document.getElementById(id).addEventListener('input',()=>{_refreshModalLabels();_refreshModalPreview();});
+  });
+  // Close modal on backdrop click
+  document.getElementById('char-modal-bg').addEventListener('click',e=>{
+    if(e.target===document.getElementById('char-modal-bg')) closeCharModal();
+  });
+
+  switchState('menu');
+
+  // Menu canvas animation
+  const mc=document.getElementById('menu-canvas');
+  const mctx=mc.getContext('2d');
+  let t=0;
+  function animMenu(){
+    mctx.clearRect(0,0,400,100);
+    mctx.fillStyle='#1a0a2e';mctx.fillRect(0,0,400,100);
+    mctx.fillStyle='#5566aa';mctx.fillRect(0,80,400,20);
+    mctx.fillStyle='#8899cc';mctx.fillRect(0,80,400,2);
+    mctx.fillStyle='#5566aa';
+    mctx.fillRect(80,55,60,8);mctx.fillRect(200,40,60,8);mctx.fillRect(310,60,60,8);
+    const trophyY=35+Math.sin(t*0.05)*4;
+    mctx.fillStyle='#ffcc00';mctx.fillRect(100,trophyY,10,14);mctx.fillRect(220,trophyY-5,10,14);mctx.fillRect(330,trophyY,10,14);
+    [[20,10],[50,25],[150,15],[250,8],[350,20],[380,35]].forEach(([x,y],i)=>{const a=0.3+Math.abs(Math.sin(t*0.03+i))*0.6;mctx.globalAlpha=a;mctx.fillStyle='#ffffff';mctx.fillRect(x,y,2,2);});
+    mctx.globalAlpha=1;
+    const JanziX=((t*1.5)%380);
+    mctx.fillStyle='#ffcc44';mctx.fillRect(JanziX,64,10,8);
+    mctx.fillStyle='#4488ff';mctx.fillRect(JanziX+1,72,8,8);
+    if(Math.floor(t/8)%2===0){mctx.fillRect(JanziX+1,80,3,4);mctx.fillRect(JanziX+6,80,3,4);}
+    else{mctx.fillRect(JanziX,80,3,4);mctx.fillRect(JanziX+7,80,3,4);}
+    t++;requestAnimationFrame(animMenu);
+  }
+  animMenu();
+});
+</script>
+</body>
+</html>
+
+
+-- dangerousgame.html --end

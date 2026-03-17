@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JSON Level Formatter</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background:#111; color:#eee; }
+    h1 { margin-bottom: 10px; }
+    textarea { width: 100%; height: 300px; margin-top: 10px; background:#222; color:#0f0; padding:10px; border-radius:6px; }
+    button { margin: 5px 5px 5px 0; padding:10px 15px; border:none; border-radius:6px; cursor:pointer; }
+    .primary { background:#4CAF50; color:white; }
+    .secondary { background:#2196F3; color:white; }
+    .danger { background:#f44336; color:white; }
+  </style>
+</head>
+<body>
+
+  <h1>Level JSON Formatter</h1>
+
+  <input type="file" id="fileInput" accept=".json" />
+  <br/>
+
+  <button class="primary" onclick="formatJson()">Format JSON</button>
+  <button class="secondary" onclick="downloadJson()">Export JSON</button>
+  <button class="danger" onclick="clearAll()">Clear</button>
+
+  <h3>Formatted Output:</h3>
+  <textarea id="output"></textarea>
+
+  <script>
+    let rawJson = null;
+
+    document.getElementById('fileInput').addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          rawJson = JSON.parse(e.target.result);
+          alert('JSON Loaded Successfully');
+        } catch (err) {
+          alert('Invalid JSON File');
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    function formatRow(row) {
+      return '[ ' + row.join(', ') + ' ]';
+    }
+
+    function formatJson() {
+	  if (!rawJson) {
+		alert('Please import JSON first');
+		return;
+	  }
+
+	  if (!Array.isArray(rawJson.tiles)) {
+		alert('Invalid format: tiles array not found');
+		return;
+	  }
+
+	  const tiles = rawJson.tiles;
+
+	  // Format only tiles
+	  let formattedTiles = '[\n';
+
+	  tiles.forEach((row, index) => {
+		formattedTiles += '    [ ' + row.join(',') + ' ]';
+		if (index !== tiles.length - 1) formattedTiles += ',';
+		formattedTiles += '\n';
+	  });
+
+	  formattedTiles += '  ]';
+
+	  // Build full JSON manually
+	  const formattedJson = `{
+	  "name": "${rawJson.name}",
+	  "width": ${rawJson.width},
+	  "height": ${rawJson.height},
+	  "tiles": ${formattedTiles}
+	}`;
+
+	  document.getElementById('output').value = formattedJson;
+	}
+
+    function downloadJson() {
+      const content = document.getElementById('output').value;
+      if (!content) {
+        alert('Nothing to export');
+        return;
+      }
+
+      const blob = new Blob([content], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'formatted_level.json';
+      a.click();
+
+      URL.revokeObjectURL(url);
+    }
+
+    function clearAll() {
+      rawJson = null;
+      document.getElementById('output').value = '';
+      document.getElementById('fileInput').value = '';
+    }
+  </script>
+
+</body>
+</html>
